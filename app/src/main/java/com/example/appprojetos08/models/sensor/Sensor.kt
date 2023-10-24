@@ -4,7 +4,8 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Sensor(
-  var sensorId : Int,
+  var sensorId: Int,
+  var sensorName: String,
   var databaseUrl: String,
   var measurementUnit: String,
   var isActive: Boolean
