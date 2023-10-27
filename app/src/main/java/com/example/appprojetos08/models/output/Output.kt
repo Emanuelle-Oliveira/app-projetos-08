@@ -6,6 +6,7 @@ import kotlinx.android.parcel.Parcelize
 data class Output(
   var outputId: Int,
   var outputName: String,
+  var databaseUrl: String,
   var isActive: Boolean,
   var groupId: Int
 ) : Parcelable
