@@ -7,7 +7,5 @@ import java.util.Date
 data class Group(
   var groupId: Int,
   var groupName: String,
-  var isActive: Boolean,
-  var createdAt: Date,
-  var updatedAt: Date,
+  var isActive: Boolean
 ) : Parcelable

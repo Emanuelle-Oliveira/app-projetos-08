@@ -5,8 +5,9 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class Sensor(
   var sensorId: Int,
-  var dataType: String,
   var databaseUrl: String,
+  var dataType: String,
   var measurementUnit: String,
-  var isActive: Boolean
+  var currentValueFloat: Float,
+  var currentValueBoolean: Boolean
 ) : Parcelable

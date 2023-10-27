@@ -6,8 +6,8 @@ import java.util.Date
 @Parcelize
 data class SetPoint(
   var setPointId: Int,
-  var value: Float,
-  var sensorGroupId: Int,
-  var createdAt: Date,
-  var updatedAt: Date,
+  var valueFloat: Float,
+  var valueBoolean: Boolean,
+  var groupId: Int,
+  var sensorId: Int,
 ) : Parcelable
