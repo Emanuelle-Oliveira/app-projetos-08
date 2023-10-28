@@ -8,7 +8,13 @@ data class Group(
   var groupId: Int,
   var groupName: String,
   var isActive: Boolean
-) : Parcelable
+) : Parcelable {
+  constructor(map: Map<String, Any>) : this(
+    groupId = (map["groupId"] as Number).toInt(),
+    groupName = map["groupName"] as String,
+    isActive = map["isActive"] as Boolean
+  )
+}
 
 fun Group.toHashMap(): HashMap<String, Any> {
   return hashMapOf(

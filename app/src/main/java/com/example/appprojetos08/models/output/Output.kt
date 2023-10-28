@@ -9,7 +9,15 @@ data class Output(
   var databaseUrl: String,
   var isActive: Boolean,
   var groupId: Int
-) : Parcelable
+) : Parcelable {
+  constructor(map: Map<String, Any>) : this(
+    outputId = (map["outputId"] as Number).toInt(),
+    outputName = map["outputName"] as String,
+    databaseUrl = map["databaseUrl"] as String,
+    isActive = map["isActive"] as Boolean,
+    groupId = (map["groupId"] as Number).toInt()
+  )
+}
 
 fun Output.toHashMap(): HashMap<String, Any> {
   return hashMapOf(
