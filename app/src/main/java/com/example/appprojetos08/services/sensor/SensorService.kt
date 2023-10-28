@@ -8,7 +8,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 
 class SensorService {
-  val db = Firebase.firestore
+  private val db = Firebase.firestore
 
   suspend fun getAll(): MutableList<Sensor> = coroutineScope {
     val sensorList = mutableListOf<Sensor>()

@@ -13,8 +13,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import com.example.appprojetos08.models.group.Group
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
+import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.services.sensor.SensorService
 import com.example.appprojetos08.ui.theme.AppProjetos08Theme
@@ -61,6 +63,30 @@ class MainActivity : ComponentActivity() {
       Log.d("Log", "Lista de sensores: $sensorList")
     }
   }
+
+  GROUP:
+  var groupList = mutableListOf<Group>()
+  private fun getGroups() {
+    lifecycleScope.launch {
+      groupList = GroupService().getAll()
+      Log.d("Log", "Lista de grupos: $groupList")
+    }
+  }
+
+  var group: Group? = null
+  private fun getGroup(id: Int) {
+    lifecycleScope.launch {
+      group = GroupService().getOne(id)
+      Log.d("Log", "Grupo: $group")
+    }
+  }
+
+  private fun createGroup(name: String) {
+    lifecycleScope.launch {
+      group = GroupService().create(name)
+      Log.d("Log", "Grupo: $group")
+    }
+  }
   */
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +97,10 @@ class MainActivity : ComponentActivity() {
     //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
 
     //getSensors()
+
+    //getGroups()
+    //getGroup(0)
+    //createGroup("Cozinha")
 
     setContent {
       AppProjetos08Theme {
