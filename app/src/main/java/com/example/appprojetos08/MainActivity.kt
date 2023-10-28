@@ -24,41 +24,39 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
-  /*var outputList = mutableListOf<Output>()
+  /*
+  TESTES DAS FUNÇÔES PARA EXEMPLO
+
+  OUTPUT:
+  var outputList = mutableListOf<Output>()
 
   private fun getOutputs() {
     lifecycleScope.launch {
       outputList = OutputService().getAll()
+      Log.d("Log", "Lista de saídas: $outputList")
     }
   }
 
   private fun getOutputsByGroupId(id: Int) {
     lifecycleScope.launch {
       outputList = OutputService().getByGroupId(id)
+      Log.d("Log", "Lista de saídas: $outputList")
+    }
+  }
+
+  private fun updateOutput(output:Output) {
+    lifecycleScope.launch {
+      var output = OutputService().update(output)
+      Log.d("Log", "Saída atualizada: $output")
     }
   }*/
-
-   /*
-   TESTES DAS FUNÇÔES PARA EXEMPLO
-
-   OUTPUT:
-   - get all
-   lifecycleScope.launch {
-     val outputList = OutputService().getAll()
-     Log.d("Log", "Lista de saídas: $outputList")
-   }
-   - getByGroupId
-   lifecycleScope.launch {
-     val outputList = OutputService().getByGroupId(0)
-     Log.d("Log", "Lista de saídas: $outputList")
-   }
-   */
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     //getOutputs()
     //getOutputsByGroupId(1)
+    //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
 
     setContent {
       AppProjetos08Theme {

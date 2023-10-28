@@ -2,6 +2,7 @@ package com.example.appprojetos08.services.output
 
 import android.util.Log
 import com.example.appprojetos08.models.output.Output
+import com.example.appprojetos08.models.output.toHashMap
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.coroutineScope
@@ -42,5 +43,17 @@ class OutputService {
       Log.w("Log", "Erro ao buscar no banco de dados.", e)
     }
     outputList
+  }
+
+  suspend fun update(output: Output): Output = coroutineScope {
+    try {
+      db.collection("output")
+        .document(output.outputId.toString())
+        .set(output.toHashMap())
+      Log.d("Log", "Saída atualizada com sucesso.")
+    } catch (e: Exception) {
+      Log.w("Log", "Erro ao atualizar no banco de dados.", e)
+    }
+    output
   }
 }
