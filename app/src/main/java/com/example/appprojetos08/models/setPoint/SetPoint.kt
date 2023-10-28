@@ -11,3 +11,13 @@ data class SetPoint(
   var groupId: Int,
   var sensorId: Int,
 ) : Parcelable
+
+fun SetPoint.toHashMap(): HashMap<String, Any> {
+  return hashMapOf(
+    "setPointId" to setPointId,
+    "valueFloat" to valueFloat,
+    "valueBoolean" to valueBoolean,
+    "groupId" to groupId,
+    "sensorId" to sensorId
+  )
+}

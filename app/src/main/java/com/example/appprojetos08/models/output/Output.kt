@@ -10,3 +10,13 @@ data class Output(
   var isActive: Boolean,
   var groupId: Int
 ) : Parcelable
+
+fun Output.toHashMap(): HashMap<String, Any> {
+  return hashMapOf(
+    "outputId" to outputId,
+    "outputName" to outputName,
+    "databaseUrl" to databaseUrl,
+    "isActive" to isActive,
+    "groupId" to groupId
+  )
+}

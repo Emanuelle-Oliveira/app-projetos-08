@@ -11,3 +11,14 @@ data class Sensor(
   var currentValueFloat: Float,
   var currentValueBoolean: Boolean
 ) : Parcelable
+
+fun Sensor.toHashMap(): HashMap<String, Any> {
+  return hashMapOf(
+    "sensorId" to sensorId,
+    "databaseUrl" to databaseUrl,
+    "dataType" to dataType,
+    "measurementUnit" to measurementUnit,
+    "currentValueFloat" to currentValueFloat,
+    "currentValueBoolean" to currentValueBoolean
+  )
+}

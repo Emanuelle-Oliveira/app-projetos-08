@@ -9,3 +9,12 @@ data class Group(
   var groupName: String,
   var isActive: Boolean
 ) : Parcelable
+
+fun Group.toHashMap(): HashMap<String, Any> {
+  return hashMapOf(
+    "groupId" to groupId,
+    "groupName" to groupName,
+    "isActive" to isActive
+  )
+}
+
