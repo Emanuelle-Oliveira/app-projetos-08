@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
 import com.example.appprojetos08.services.output.OutputService
+import com.example.appprojetos08.services.sensor.SensorService
 import com.example.appprojetos08.ui.theme.AppProjetos08Theme
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
@@ -49,7 +50,18 @@ class MainActivity : ComponentActivity() {
       var output = OutputService().update(output)
       Log.d("Log", "Saída atualizada: $output")
     }
-  }*/
+  }
+
+  SENSOR:
+  var sensorList = mutableListOf<Sensor>()
+
+  private fun getSensors() {
+    lifecycleScope.launch {
+      sensorList = SensorService().getAll()
+      Log.d("Log", "Lista de sensores: $sensorList")
+    }
+  }
+  */
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -57,6 +69,8 @@ class MainActivity : ComponentActivity() {
     //getOutputs()
     //getOutputsByGroupId(1)
     //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
+
+    //getSensors()
 
     setContent {
       AppProjetos08Theme {

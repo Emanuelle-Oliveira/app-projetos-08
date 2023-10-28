@@ -32,7 +32,7 @@ class OutputService {
     val outputList = mutableListOf<Output>()
 
     try {
-      val result = db.collection("output").whereEqualTo("groupId", 0).get().await()
+      val result = db.collection("output").whereEqualTo("groupId", id).get().await()
       for (document in result) {
         val outputData = document.data
         val output = Output(outputData)
