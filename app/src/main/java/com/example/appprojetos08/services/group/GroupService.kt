@@ -82,15 +82,15 @@ class GroupService {
   suspend fun delete(id: Int) = coroutineScope {
     try {
       db.collection("group").document(id.toString()).delete().await()
+
       val result = db.collection("setPoint").whereEqualTo("groupId", id).get().await()
-      Log.d("Log", result.toString())
       for (document in result) {
-        Log.d("Log", document.toString())
         db.collection("setPoint").document(document.data["setPointId"].toString()).delete().await()
       }
+
       Log.d("Log", "Grupo deletado com sucesso.")
     } catch (e: Exception) {
-      Log.w("Log", "Erro ao buscar no banco de dados.", e)
+      Log.w("Log", "Erro ao deletar no banco de dados.", e)
     }
   }
 }
