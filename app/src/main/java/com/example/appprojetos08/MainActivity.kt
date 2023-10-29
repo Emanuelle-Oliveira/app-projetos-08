@@ -87,6 +87,22 @@ class MainActivity : ComponentActivity() {
       Log.d("Log", "Grupo: $group")
     }
   }
+
+  private fun updateGroup(group: Group) {
+    lifecycleScope.launch {
+
+      val updatedGroup = GroupService().update(group)
+      Log.d("Log", "Grupo: updatedGroup")
+    }
+  }
+
+   private fun deleteGroup(id: Int) {
+    lifecycleScope.launch {
+
+      GroupService().delete(id)
+      Log.d("Log", "Grupo deletado")
+    }
+  }
   */
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,6 +117,8 @@ class MainActivity : ComponentActivity() {
     //getGroups()
     //getGroup(0)
     //createGroup("Cozinha")
+    //updateGroup(Group(3, "Quarto", true))
+    //deleteGroup(2)
 
     setContent {
       AppProjetos08Theme {

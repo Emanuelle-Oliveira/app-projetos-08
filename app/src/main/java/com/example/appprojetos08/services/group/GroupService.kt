@@ -65,4 +65,25 @@ class GroupService {
     }
     group
   }
+
+  suspend fun update(group: Group): Group = coroutineScope {
+    try {
+      db.collection("group")
+        .document(group.groupId.toString())
+        .set(group.toHashMap())
+      Log.d("Log", "Grupo atualizado com sucesso.")
+    } catch (e: Exception) {
+      Log.w("Log", "Erro ao atualizar no banco de dados.", e)
+    }
+    group
+  }
+
+  suspend fun delete(id: Int) = coroutineScope {
+    try {
+      db.collection("group").document(id.toString()).delete().await()
+      Log.d("Log", "Grupo deletado com sucesso.")
+    } catch (e: Exception) {
+      Log.w("Log", "Erro ao buscar no banco de dados.", e)
+    }
+  }
 }
