@@ -39,18 +39,25 @@ import androidx.compose.ui.unit.dp
 import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.controllers.group.GroupController
 import com.example.appprojetos08.controllers.output.OutputController
+import com.example.appprojetos08.controllers.setPoint.SetPointController
 import com.example.appprojetos08.models.output.Output
 import kotlinx.coroutines.*
 
-
 class MainActivity : ComponentActivity() {
+
+  private val outputController = OutputController()
 
   private val sensorController = SensorController()
 
   private val groupController = GroupController();
 
+  private val setPointController = SetPointController()
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    //outputController.getOutputsByGroupId(0)
+    //Log.i("Log", outputController.outputListByGroupId.toString())
 
     setContent {
       HomeScreenStructure()
@@ -61,8 +68,6 @@ class MainActivity : ComponentActivity() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   fun HomeScreenStructure() {
-    val outputController = OutputController();
-    val groupController = GroupController();
     Scaffold(
       topBar = {
         TopAppBar(

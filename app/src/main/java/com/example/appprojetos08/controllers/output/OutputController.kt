@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 class OutputController {
 
     var outputList by mutableStateOf(listOf<Output>())
+    var outputListByGroupId by mutableStateOf(listOf<Output>())
+    lateinit var updatedOutput: Output
 
     init {
         getOutputs()
@@ -28,6 +30,20 @@ class OutputController {
     private fun getOutputs() {
         GlobalScope.launch {
             outputList = OutputService().getAll()
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun getOutputsByGroupId(id: Int) {
+        GlobalScope.launch {
+            outputListByGroupId = OutputService().getByGroupId(id)
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun updateOutput(output: Output) {
+        GlobalScope.launch {
+            updatedOutput = OutputService().update(output)
         }
     }
 }
