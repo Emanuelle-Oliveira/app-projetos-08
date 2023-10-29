@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.example.appprojetos08.Controller.SensorController
 import com.example.appprojetos08.controllers.GroupController
 import com.example.appprojetos08.controllers.OutputController
 import com.example.appprojetos08.models.group.Group
@@ -62,7 +64,19 @@ import kotlinx.coroutines.*
 
 
 class MainActivity : ComponentActivity() {
+
+  private val sensorController = SensorController()
+  @Composable
+  fun SensorListDisplay() {
+    Column(modifier = Modifier.fillMaxSize()) {
+      sensorController.sensorList.forEach { sensor ->
+        Text(text = "Database URL: ${sensor.databaseUrl}")
+      }
+    }
+  }
+
   private val groupController = GroupController();
+
   /*
   TESTES DAS FUNÇÔES PARA EXEMPLO
 
@@ -142,7 +156,6 @@ class MainActivity : ComponentActivity() {
   */
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
 
     //getOutputs()
     //getOutputsByGroupId(1)
