@@ -22,7 +22,7 @@ class GroupService {
         val group = Group(groupData)
         groupList.add(group)
       }
-      Log.d("Log", "Lista de grupos: $groupList.")
+      //Log.d("Log", "Lista de grupos: $groupList.")
     } catch (e: Exception) {
       Log.w("Log", "Erro ao buscar no banco de dados.", e)
     }
