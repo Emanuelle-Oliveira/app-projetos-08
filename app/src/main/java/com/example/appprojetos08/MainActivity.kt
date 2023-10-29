@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -13,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import com.example.appprojetos08.Controller.SensorController
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
 import com.example.appprojetos08.services.output.OutputService
@@ -25,6 +27,15 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
+  private val sensorController = SensorController()
+  @Composable
+  fun SensorListDisplay() {
+    Column(modifier = Modifier.fillMaxSize()) {
+      sensorController.sensorList.forEach { sensor ->
+        Text(text = "Database URL: ${sensor.databaseUrl}")
+      }
+    }
+  }
   /*
   TESTES DAS FUNÇÔES PARA EXEMPLO
 
@@ -64,7 +75,6 @@ class MainActivity : ComponentActivity() {
   */
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
 
     //getOutputs()
     //getOutputsByGroupId(1)
@@ -72,10 +82,12 @@ class MainActivity : ComponentActivity() {
 
     //getSensors()
 
+    super.onCreate(savedInstanceState)
+
     setContent {
       AppProjetos08Theme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          Greeting("Android")
+          SensorListDisplay()
         }
       }
     }
