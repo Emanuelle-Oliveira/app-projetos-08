@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.appprojetos08.models.sensor.Sensor
 import com.example.appprojetos08.services.sensor.SensorService
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -22,6 +23,7 @@ class SensorController {
         getSensors()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun getSensors() {
         GlobalScope.launch {
             sensorList = SensorService().getAll()

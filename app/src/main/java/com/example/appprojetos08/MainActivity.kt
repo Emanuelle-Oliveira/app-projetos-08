@@ -56,8 +56,9 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    //outputController.getOutputsByGroupId(0)
-    //Log.i("Log", outputController.outputListByGroupId.toString())
+    /*outputController.getOutputsByGroupId(0) {
+      Log.i("Log", outputController.outputListByGroupId.toString())
+    }*/
 
     setContent {
       HomeScreenStructure()

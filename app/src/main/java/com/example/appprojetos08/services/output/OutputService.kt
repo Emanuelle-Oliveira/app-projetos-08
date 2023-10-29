@@ -45,15 +45,16 @@ class OutputService {
     outputList
   }
 
-  suspend fun update(output: Output): Output = coroutineScope {
+  suspend fun update(output: Output): Output? = coroutineScope {
     try {
       db.collection("output")
         .document(output.outputId.toString())
         .set(output.toHashMap())
       Log.d("Log", "Saída atualizada com sucesso.")
+      output
     } catch (e: Exception) {
       Log.w("Log", "Erro ao atualizar no banco de dados.", e)
+      null
     }
-    output
   }
 }

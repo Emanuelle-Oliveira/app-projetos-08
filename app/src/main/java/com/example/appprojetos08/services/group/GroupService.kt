@@ -23,15 +23,15 @@ class GroupService {
         val group = Group(groupData)
         groupList.add(group)
       }
-      //Log.d("Log", "Lista de grupos: $groupList.")
+      Log.d("Log", "Lista de grupos: $groupList.")
     } catch (e: Exception) {
       Log.w("Log", "Erro ao buscar no banco de dados.", e)
     }
     groupList
   }
 
-  suspend fun getOne(id: Int): Group? = coroutineScope {
-    var group: Group? = null
+  suspend fun getOne(id: Int): Group = coroutineScope {
+    lateinit var group: Group
     try {
       val result = db.collection("group").get().await()
       group = Group(result.first().data)
@@ -43,7 +43,7 @@ class GroupService {
   }
 
   suspend fun create(name: String): Group? = coroutineScope {
-    var group: Group? = null
+    lateinit var group: Group
     try {
       val result = db.collection("lastGroupId").get().await()
       val lastId = result.first().data["lastGroupId"]
@@ -61,25 +61,27 @@ class GroupService {
         ))
 
       Log.d("Log", "Grupo criado com sucesso.")
+      group
     } catch (e: Exception) {
       Log.w("Log", "Erro ao criar no banco de dados.", e)
+      null
     }
-    group
   }
 
-  suspend fun update(group: Group): Group = coroutineScope {
+  suspend fun update(group: Group): Group? = coroutineScope {
     try {
       db.collection("group")
         .document(group.groupId.toString())
         .set(group.toHashMap())
       Log.d("Log", "Grupo atualizado com sucesso.")
+      group
     } catch (e: Exception) {
       Log.w("Log", "Erro ao atualizar no banco de dados.", e)
+      null
     }
-    group
   }
 
-  suspend fun delete(id: Int) = coroutineScope {
+  suspend fun delete(id: Int): Int? = coroutineScope {
     try {
       db.collection("group").document(id.toString()).delete().await()
 
@@ -89,8 +91,10 @@ class GroupService {
       }
 
       Log.d("Log", "Grupo deletado com sucesso.")
+      id
     } catch (e: Exception) {
       Log.w("Log", "Erro ao deletar no banco de dados.", e)
+      null
     }
   }
 }
