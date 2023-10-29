@@ -240,7 +240,7 @@ class MainActivity : ComponentActivity() {
         contentColor = Color.DarkGray
       ),
       elevation = CardDefaults.cardElevation(
-        defaultElevation = 4.dp
+        defaultElevation = 100.dp
       )
     ) {
       Column(
