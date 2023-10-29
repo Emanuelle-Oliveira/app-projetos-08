@@ -9,7 +9,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 
 class OutputService {
-  val db = Firebase.firestore
+  private val db = Firebase.firestore
 
   suspend fun getAll(): MutableList<Output> = coroutineScope {
     val outputList = mutableListOf<Output>()
