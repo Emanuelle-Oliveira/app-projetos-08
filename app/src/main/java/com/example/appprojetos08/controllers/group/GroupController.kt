@@ -1,4 +1,4 @@
-package com.example.appprojetos08.controllers
+package com.example.appprojetos08.controllers.group
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
