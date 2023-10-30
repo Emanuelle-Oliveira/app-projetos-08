@@ -36,11 +36,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.controllers.group.GroupController
 import com.example.appprojetos08.controllers.output.OutputController
-import com.example.appprojetos08.controllers.setPoint.SetPointController
+import com.example.appprojetos08.models.group.Group
 import com.example.appprojetos08.models.output.Output
+import com.example.appprojetos08.models.setPoint.SetPoint
+import com.example.appprojetos08.services.group.GroupService
+import com.example.appprojetos08.services.output.OutputService
+import com.example.appprojetos08.services.setPoint.SetPointService
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
@@ -51,19 +56,117 @@ class MainActivity : ComponentActivity() {
 
   private val groupController = GroupController();
 
-  private val setPointController = SetPointController()
+  /*
+  OUTPUT:
+
+  private var outputList = mutableListOf<Output>()
+  private fun getOutputsByGroupId(id: Int) {
+    lifecycleScope.launch {
+      outputList = OutputService().getByGroupId(id)
+      Log.d("Log", "Lista de saídas: $outputList")
+    }
+  }
+
+  private var updatedOutput : Output? = null
+  private fun updateOutput(output:Output) {
+    lifecycleScope.launch {
+      updatedOutput = OutputService().update(output)
+      Log.d("Log", "Saída atualizada: $updatedOutput")
+    }
+  }
+  */
+  /*
+  GROUP:
+
+  private var group: Group? = null
+  private fun getGroup(id: Int) {
+    lifecycleScope.launch {
+      group = GroupService().getOne(id)
+      Log.d("Log", "Grupo: $group")
+    }
+  }
+
+  private var createdGroup: Group? = null
+  private fun createGroup(name: String) {
+    lifecycleScope.launch {
+      createdGroup = GroupService().create(name)
+      Log.d("Log", "Grupo: $group")
+    }
+  }
+
+  private var updatedGroup: Group? = null
+  private fun updateGroup(group: Group) {
+    lifecycleScope.launch {
+      updatedGroup = GroupService().update(group)
+      Log.d("Log", "Grupo: $updatedGroup")
+    }
+  }
+
+  private var deletedId: Int? = null
+  private fun deleteGroup(id: Int) {
+    lifecycleScope.launch {
+      deletedId = GroupService().delete(id)
+      Log.d("Log", "Grupo deletado")
+    }
+  }
+  */
+  /*
+  SET POINT:
+
+  private var setPointList = mutableListOf<SetPoint>()
+  private fun getSetPointsByGroupId(id: Int) {
+    lifecycleScope.launch {
+      setPointList = SetPointService().getByGroupId(id)
+      Log.d("Log", "Lista de set points: $setPointList")
+    }
+  }
+
+  private var createdSetPoint: SetPoint? = null
+  private fun createSetPoint(value: Any, groupId: Int, sensorId: Int) {
+    lifecycleScope.launch {
+      createdSetPoint = SetPointService().create(value, groupId, sensorId)
+      Log.d("Log", "SetPoint: $createdSetPoint")
+    }
+  }
+
+  private var updatedSetPoint: SetPoint? = null
+  private fun updateSetPoint(setPoint: SetPoint) {
+    lifecycleScope.launch {
+      updatedSetPoint = SetPointService().update(setPoint)
+      Log.d("Log", "SetPoint: $updatedSetPoint")
+    }
+  }
+
+  private var deletedId: Int? = null
+  private fun deleteSetPoint(id: Int) {
+    lifecycleScope.launch {
+      deletedId = SetPointService().delete(id)
+      Log.d("Log", "SetPoint deletado")
+    }
+  }
+  */
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    /*outputController.getOutputsByGroupId(0) {
-      Log.i("Log", outputController.outputListByGroupId.toString())
-    }*/
+    //getOutputsByGroupId(1)
+    //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
+
+    //getGroup(0)
+    //createGroup("Cozinha")
+    //updateGroup(Group(3, "Quarto", true))
+    //deleteGroup(2)
+
+    //getSetPointsByGroupId(1)
+    //createSetPoint(30F, 0, 0)
+    //updateSetPoint(SetPoint(4, 30F, null, 0, 0))
+    //deleteSetPoint(0)
 
     setContent {
       HomeScreenStructure()
     }
   }
+
 
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   @OptIn(ExperimentalMaterial3Api::class)

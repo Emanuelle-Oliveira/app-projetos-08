@@ -18,9 +18,6 @@ import kotlinx.coroutines.launch
 class GroupController {
 
     var groupList by mutableStateOf(listOf<Group>())
-    /*var group: Group? = null
-    var createdGroup: Group? = null
-    var updatedGroup: Group? = null*/
 
     init {
         getGroups()
@@ -32,25 +29,4 @@ class GroupController {
             groupList = GroupService().getAll()
         }
     }
-
-    /*@OptIn(DelicateCoroutinesApi::class)
-    fun getGroup(id: Int) {
-        GlobalScope.launch {
-            group = GroupService().getOne(id)
-        }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    fun createGroup(name: String) {
-        GlobalScope.launch {
-            createdGroup = GroupService().create(name)
-        }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    fun updateGroup(group: Group) {
-        GlobalScope.launch {
-            updatedGroup = GroupService().update(group)
-        }
-    }*/
 }

@@ -30,7 +30,42 @@ class SetPointService {
     setPointList
   }
 
-  suspend fun create(setPoint: SetPoint): SetPoint = coroutineScope {
+  suspend fun create(value: Any, groupId: Int, sensorId: Int): SetPoint? = coroutineScope {
+
+    lateinit var setPoint: SetPoint
+
+    try {
+      val result = db.collection("lastSetPointId").get().await()
+      val lastId = result.first().data["lastSetPointId"]
+      val id = (lastId as Number).toInt() + 1
+
+      if (value is Float) {
+        setPoint = SetPoint(id, value, null, groupId, sensorId)
+      }
+
+      if (value is Boolean) {
+        setPoint = SetPoint(id, null, value, groupId, sensorId)
+      }
+
+      db.collection("setPoint")
+        .document(id.toString())
+        .set(setPoint.toHashMap())
+
+      db.collection("lastSetPointId")
+        .document("lastSetPointId")
+        .set(hashMapOf(
+          "lastSetPointId" to id
+        ))
+
+      Log.d("Log", "Set point criado com sucesso.")
+      setPoint
+    } catch (e: Exception) {
+      Log.w("Log", "Erro ao criar no banco de dados.", e)
+      null
+    }
+  }
+
+  suspend fun update(setPoint: SetPoint): SetPoint? = coroutineScope {
     try {
       val result = db.collection("lastSetPointId").get().await()
       val lastId = result.first().data["lastSetPointId"]
@@ -47,41 +82,21 @@ class SetPointService {
         ))
 
       Log.d("Log", "Set point criado com sucesso.")
+      setPoint
     } catch (e: Exception) {
       Log.w("Log", "Erro ao criar no banco de dados.", e)
+      null
     }
-    setPoint
   }
 
-  suspend fun update(setPoint: SetPoint): SetPoint = coroutineScope {
-    try {
-      val result = db.collection("lastSetPointId").get().await()
-      val lastId = result.first().data["lastSetPointId"]
-      val id = (lastId as Number).toInt() + 1
-
-      db.collection("setPoint")
-        .document(id.toString())
-        .set(setPoint.toHashMap())
-
-      db.collection("lastSetPointId")
-        .document("lastSetPointId")
-        .set(hashMapOf(
-          "lastSetPointId" to id
-        ))
-
-      Log.d("Log", "Set point criado com sucesso.")
-    } catch (e: Exception) {
-      Log.w("Log", "Erro ao criar no banco de dados.", e)
-    }
-    setPoint
-  }
-
-  suspend fun delete(id: Int) = coroutineScope {
+  suspend fun delete(id: Int): Int? = coroutineScope {
     try {
       db.collection("setPoint").document(id.toString()).delete().await()
       Log.d("Log", "Set point deletado com sucesso.")
+      id
     } catch (e: Exception) {
       Log.w("Log", "Erro ao deletar no banco de dados.", e)
+      null
     }
   }
 }

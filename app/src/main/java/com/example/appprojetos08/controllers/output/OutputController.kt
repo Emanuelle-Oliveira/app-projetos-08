@@ -1,5 +1,6 @@
 package com.example.appprojetos08.controllers.output
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +20,6 @@ import kotlinx.coroutines.launch
 class OutputController {
 
     var outputList by mutableStateOf(listOf<Output>())
-    /*var outputListByGroupId by mutableStateOf(listOf<Output>())
-    var updatedOutput: Output? = null*/
 
     init {
         getOutputs()
@@ -32,19 +31,4 @@ class OutputController {
             outputList = OutputService().getAll()
         }
     }
-
-    /*@OptIn(DelicateCoroutinesApi::class)
-    fun getOutputsByGroupId(id: Int, onFinished: () -> Unit) {
-        GlobalScope.launch {
-            outputListByGroupId = OutputService().getByGroupId(id)
-            onFinished()
-        }
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    fun updateOutput(output: Output) {
-        GlobalScope.launch {
-            updatedOutput = OutputService().update(output)
-        }
-    }*/
 }
