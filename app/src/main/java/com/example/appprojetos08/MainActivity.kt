@@ -5,37 +5,28 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ModalDrawer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.controllers.group.GroupController
@@ -54,7 +45,7 @@ class MainActivity : ComponentActivity() {
 
   private val sensorController = SensorController()
 
-  private val groupController = GroupController();
+  private val groupController = GroupController()
 
   /*
   OUTPUT:
@@ -146,8 +137,17 @@ class MainActivity : ComponentActivity() {
   }
   */
 
+  private val groupsList = mutableStateOf(emptyList<Group>())
+
+  private fun getGroup() {
+    lifecycleScope.launch {
+      groupsList.value = GroupService().getAll()
+    }
+  }
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    getGroup()
 
     //getOutputsByGroupId(1)
     //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
@@ -163,7 +163,11 @@ class MainActivity : ComponentActivity() {
     //deleteSetPoint(0)
 
     setContent {
-      HomeScreenStructure()
+      Box{
+        //NavigationDrawerFun(groupsList)
+        HomeScreenStructure(groupsList)
+      }
+
     }
   }
 
@@ -171,50 +175,143 @@ class MainActivity : ComponentActivity() {
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
-  fun HomeScreenStructure() {
-    Scaffold(
-      topBar = {
-        TopAppBar(
-          title = {},
-          colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.DarkGray),
-          navigationIcon = {
-            Icon(
-              imageVector = Icons.Default.Menu,
-              contentDescription = "Menu",
-              tint = Color.White
-            )
-          }
-        )
-      },
-      floatingActionButton = {
-        FloatingActionButton(
-          onClick = {
+  fun HomeScreenStructure(groupsList: State<List<Group>>) {
+    val addGroupItem = NavigationItem(
+      title = "Adicionar Grupo",
+      id = 100,
+      selectedIcon = Icons.Default.Add,
+      unselectedIcon = Icons.Default.Add,
+    )
 
-          },
-          containerColor = Color.White,
-          contentColor = Color.DarkGray,
-        ) {
-          Icon(imageVector = Icons.Default.Add, contentDescription = "Adicionar Saída", tint = Color.DarkGray)
-        }
-      }
+    val items = groupsList.value.map { group ->
+      NavigationItem(
+        title = group.groupName,
+        id = group.groupId,
+        selectedIcon = Icons.Filled.Star,
+        unselectedIcon = Icons.Outlined.Star,
+      )
+    }
+
+    // Adicione o item "Adicionar Grupo" à lista de items
+    val allItems = items + addGroupItem
+
+
+    androidx.compose.material.Surface(
+      modifier = Modifier.fillMaxSize(),
+      color = Color.LightGray
     ) {
-      // Fundo preto da tela
-      Surface(
-        color = Color.DarkGray,
-        modifier = Modifier.fillMaxSize()
+      val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+      val scope = rememberCoroutineScope()
+      var selectedItemIndex by rememberSaveable {
+        mutableStateOf(0)
+      }
+      ModalNavigationDrawer(
+
+        drawerContent = {
+          Surface(
+            modifier = Modifier
+              .fillMaxSize()
+              .background(Color.LightGray) // Cor de fundo do menu lateral
+          ){
+            ModalDrawerSheet {
+              Spacer(modifier = Modifier.height(64.dp))
+              allItems.forEachIndexed { index, item ->
+                NavigationDrawerItem(
+                  label = {
+                    androidx.compose.material.Text(text = item.title, style = TextStyle(fontSize = 20.sp))
+                  },
+                  selected = index == selectedItemIndex,
+                  onClick = {
+//                                            navController.navigate(item.route)
+
+                    selectedItemIndex = index
+                    scope.launch {
+                      drawerState.close()
+                    }
+                  },
+                  icon = {
+                    Icon(
+                      imageVector = if (index == selectedItemIndex) {
+                        item.selectedIcon
+                      } else item.unselectedIcon,
+                      contentDescription = item.title
+                    )
+                  },
+                  badge = {
+                    item.badgeCount?.let {
+                      androidx.compose.material.Text(text = item.badgeCount.toString())
+                    }
+                  },
+                  modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+
+
+              }
+            }
+          }
+
+        },
+        drawerState = drawerState
       ) {
-        LazyColumn(
-          contentPadding = PaddingValues(16.dp)
-        ) {
-          // Divide os cards em duas colunas
-          items(outputController.outputList.chunked(2)) { chunkedOutputs ->
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+        Scaffold(
+          topBar = {
+            TopAppBar(
+              title = {
+                androidx.compose.material.Text(
+                  text = "Smart House",
+                  color = Color.White,
+                  style = TextStyle(fontSize = 20.sp)
+                )
+              },
+              colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.DarkGray),
+              navigationIcon = {
+                IconButton(onClick = {
+                  scope.launch {
+                    drawerState.open()
+                  }
+                }) {
+                  Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = Color.White
+                  )
+                }
+              }
+            )
+          },
+          floatingActionButton = {
+            FloatingActionButton(
+              onClick = {
+
+              },
+              containerColor = Color.White,
+              contentColor = Color.DarkGray,
             ) {
-              for (output in chunkedOutputs) {
-                OutputCard(output = output)
+              Icon(imageVector = Icons.Default.Add, contentDescription = "Adicionar Saída", tint = Color.DarkGray)
+            }
+          }
+
+        ){
+          // Fundo preto da tela
+          Surface(
+            color = Color.DarkGray,
+            modifier = Modifier.fillMaxSize()
+          ) {
+            LazyColumn(
+              contentPadding = PaddingValues(16.dp)
+            ) {
+              // Divide os cards em duas colunas
+              items(outputController.outputList.chunked(2)) { chunkedOutputs ->
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                ) {
+                  for (output in chunkedOutputs) {
+                    OutputCard(output = output)
+                  }
+                }
               }
             }
           }
@@ -275,4 +372,3 @@ class MainActivity : ComponentActivity() {
     }
   }
 }
-
