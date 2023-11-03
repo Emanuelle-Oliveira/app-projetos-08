@@ -1,12 +1,17 @@
 package com.example.appprojetos08
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,20 +29,38 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.ShoppingCart
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +74,12 @@ import com.example.appprojetos08.controllers.OutputController
 import com.example.appprojetos08.models.group.Group
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.sp
+import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.services.sensor.SensorService
@@ -57,12 +87,18 @@ import com.example.appprojetos08.ui.theme.AppProjetos08Theme
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.*
 
 
 class MainActivity : ComponentActivity() {
-  private val groupController = GroupController();
+  private val outputController = OutputController()
+  private val sensorController = SensorController()
+  private val groupController = GroupController()
+  private val outputService = OutputService()
+  private val db = Firebase.firestore
+
   /*
   TESTES DAS FUNÇÔES PARA EXEMPLO
 
@@ -140,10 +176,22 @@ class MainActivity : ComponentActivity() {
     }
   }
   */
+  private val groupsList = mutableStateOf(emptyList<Group>())
+  private val outputsList = mutableStateOf(outputController.outputList)
+  private fun getGroup() {
+    lifecycleScope.launch {
+      groupsList.value = GroupService().getAll()
+    }
+  }
+  private fun getOutputByID(selectedGroupId : Int) {
+    lifecycleScope.launch {
+      outputService.getByGroupId(selectedGroupId)
+    }
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
+    getGroup()
     //getOutputs()
     //getOutputsByGroupId(1)
     //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
@@ -155,60 +203,155 @@ class MainActivity : ComponentActivity() {
     //createGroup("Cozinha")
     //updateGroup(Group(3, "Quarto", true))
     //deleteGroup(2)
-
     setContent {
       HomeScreenStructure()
     }
   }
+
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   fun HomeScreenStructure() {
-    val outputController = OutputController();
-    val groupController = GroupController();
-    Scaffold(
-      topBar = {
-        TopAppBar(
-          title = {},
-          colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.DarkGray),
-          navigationIcon = {
-            Icon(
-              imageVector = Icons.Default.Menu,
-              contentDescription = "Menu",
-              tint = Color.White
-            )
-          }
-        )
-      },
-      floatingActionButton = {
-        FloatingActionButton(
-          onClick = {
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    var selectedItemIndex by remember { mutableStateOf(0) }
 
-          },
-          containerColor = Color.White,
-          contentColor = Color.DarkGray,
-        ) {
-          Icon(imageVector = Icons.Default.Add, contentDescription = "Adicionar Saída", tint = Color.DarkGray)
-        }
-      }
+    // 2. Crie a função para o conteúdo do drawer
+    val addGroupItem = NavigationItem(
+      title = "Adicionar Grupo",
+      id = 100,
+      selectedIcon = Icons.Default.Add,
+      unselectedIcon = Icons.Default.Add,
+    )
+
+    val items = groupsList.value.map { group ->
+      NavigationItem(
+        title = group.groupName,
+        id = group.groupId,
+        selectedIcon = Icons.Filled.Star,
+        unselectedIcon = Icons.Outlined.Star,
+      )
+    }
+    val allItems = items + addGroupItem
+
+    androidx.compose.material.Surface(
+      modifier = Modifier.fillMaxSize()
+        .background(Color.DarkGray),
+      color = Color.DarkGray
     ) {
-      // Fundo preto da tela
-      Surface(
-        color = Color.DarkGray,
-        modifier = Modifier.fillMaxSize()
+      val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+      val scope = rememberCoroutineScope()
+      var selectedItemIndex by rememberSaveable {
+        mutableStateOf(0)
+      }
+      var selectedGroupId by rememberSaveable { mutableStateOf(0) }
+
+      ModalNavigationDrawer(
+        modifier = Modifier.background(Color.DarkGray),
+        drawerContent = {
+          Surface(
+            modifier = Modifier
+                    .offset(x= (-20).dp)
+              .background(Color.DarkGray) // Cor de fundo do menu lateral
+          ) {
+            ModalDrawerSheet (modifier = Modifier.background(Color.DarkGray)){
+              Spacer(modifier = Modifier.height(64.dp))
+              allItems.forEachIndexed { index, item ->
+                NavigationDrawerItem(
+                  label = {
+                    androidx.compose.material.Text(
+                      text = item.title,
+                      style = TextStyle(fontSize = 20.sp)
+                    )
+                  },
+                  selected = index == selectedItemIndex,
+                  onClick = {
+                    selectedItemIndex = index
+                    selectedGroupId = item.id
+                    getOutputByID(selectedGroupId)
+                    scope.launch {
+                      drawerState.close()
+                    }
+                  },
+                  icon = {
+                    Icon(
+                      imageVector = if (index == selectedItemIndex) {
+                        item.selectedIcon
+                      } else item.unselectedIcon,
+                      contentDescription = item.title
+                    )
+                  },
+                  badge = {
+                    item.badgeCount?.let {
+                      androidx.compose.material.Text(text = item.badgeCount.toString())
+                    }
+                  },
+                  modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+              }
+            }
+          }
+        },
+        drawerState = drawerState
       ) {
-        LazyColumn(
-          contentPadding = PaddingValues(16.dp)
-        ) {
-          // Divide os cards em duas colunas
-          items(outputController.outputList.chunked(2)) { chunkedOutputs ->
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+        Scaffold(
+          topBar = {
+            TopAppBar(
+              title = {},
+              modifier = Modifier.height(48.dp),
+              colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Transparent),
+              navigationIcon = {
+                IconButton(onClick = {
+                  scope.launch {
+                    drawerState.open()
+                  }
+                }) {
+                  Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = Color.White
+                  )
+                }
+              }
+            )
+          },
+          floatingActionButton = {
+            FloatingActionButton(
+              onClick = {
+
+              },
+              containerColor = Color.White,
+              contentColor = Color.DarkGray,
             ) {
-              for (output in chunkedOutputs) {
-                OutputCard(output = output)
+              Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Adicionar Saída",
+                tint = Color.DarkGray
+              )
+            }
+          }
+        ) {
+          // Fundo preto da tela
+          Spacer(modifier = Modifier.height(8.dp))
+          Surface(
+            color = Color.DarkGray,
+            modifier = Modifier.fillMaxSize()
+          ) {
+            LazyColumn(
+              contentPadding = PaddingValues(18.dp)
+            ) {
+              // Divide os cards em duas colunas
+              items(outputController.outputList.chunked(2)) { chunkedOutputs ->
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, bottom = 12.dp)
+                ) {
+                  for (output in chunkedOutputs) {
+                    OutputCard(output = output)
+                  }
+                }
               }
             }
           }
@@ -218,23 +361,49 @@ class MainActivity : ComponentActivity() {
   }
   @Composable
   fun OutputCard(output: Output) {
-
     var groupOfOutputCard = "Sem grupo"
     Log.i("1", "groupController: ${groupController.groupList}")
 
     groupController.groupList.forEach { group ->
       Log.i("1", "groupId output: ${output.groupId} e groupId Group: ${group.groupId}")
-      if(output.groupId == group.groupId){
+      if (output.groupId == group.groupId) {
         Log.i("1", "Entrou if")
         groupOfOutputCard = group.groupName
       }
+    }
+    val docRef = db.collection("outputs").document(output.outputId.toString())
+    val outputState = remember { mutableStateOf(output) }
+
+    LaunchedEffect(Unit) {
+      val listener = docRef.addSnapshotListener { documentSnapshot, e ->
+        if (e != null) {
+          Log.w(TAG, "listen:error", e)
+          return@addSnapshotListener
+        }
+        if (documentSnapshot != null && documentSnapshot.exists()) {
+          val updatedOutput = documentSnapshot.toObject(Output::class.java)
+          if (updatedOutput != null) {
+            outputState.value = updatedOutput
+          }
+        }
+      }
+//      onDispose {
+//        listener.remove()
+//      }
     }
     Card(
       modifier = Modifier
         .width(185.dp)
         .padding(10.dp)
-        .height(200.dp),
-      shape = RoundedCornerShape(10.dp),
+        .height(200.dp)
+        .clickable {
+          val newStatus = !output.isActive
+          output.isActive = newStatus
+          lifecycleScope.launch {
+            OutputService().toggleOutputActiveStatus(output.outputId.toString().toInt(), newStatus)
+          }
+        },
+      shape = RoundedCornerShape(15.dp),
       colors = CardDefaults.cardColors(
         containerColor = Color.White,
         contentColor = Color.DarkGray
@@ -248,25 +417,37 @@ class MainActivity : ComponentActivity() {
           .fillMaxSize()
           .padding(16.dp),
 
-      ) {
+        ) {
         Icon(
           painter = painterResource(R.drawable.power_settings_new),
           contentDescription = "Icone desligar/ligar saída",
           modifier = Modifier
             .size(110.dp)
             .padding(10.dp)
+            .align(Alignment.CenterHorizontally)
         )
-
         Spacer(modifier = Modifier.height(8.dp))
         Text(
           text = "${output.outputName}", // Substitua pelo nome do dispositivo
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-          text = "${groupOfOutputCard}", // Substitua pelo status do dispositivo
+          text = "${groupOfOutputCard}",
         )
+        val updatedOutput = outputState.value
+        Canvas(
+          modifier = Modifier.fillMaxSize()
+        ) {
+          val radius = 18f
+          val x = size.width - radius * 1.5f
+          val y = (radius * 1.5f)
+          val color = if (updatedOutput.isActive) Color.Green else Color.Red
+          drawCircle(color, center = Offset(x + 6.dp.toPx(), y), radius = radius)
+        }
       }
     }
   }
 }
+
+
 

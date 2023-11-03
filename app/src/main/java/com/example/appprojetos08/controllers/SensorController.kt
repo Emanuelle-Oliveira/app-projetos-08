@@ -1,4 +1,4 @@
-package com.example.appprojetos08.controllers
+package com.example.appprojetos08.controllers.sensor
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
@@ -9,31 +9,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.appprojetos08.models.output.Output
-import com.example.appprojetos08.services.output.OutputService
+import com.example.appprojetos08.models.sensor.Sensor
 import com.example.appprojetos08.services.sensor.SensorService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class OutputController {
+class SensorController {
 
-    var outputList by mutableStateOf(listOf<Output>())
-    //var outputListById by mutableStateOf(listOf<Output>())
+    var sensorList by mutableStateOf(listOf<Sensor>())
+
     init {
-        getOutputs()
+        getSensors()
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getOutputs() {
+    private fun getSensors() {
         GlobalScope.launch {
-            outputList = OutputService().getAll()
-        }
-    }
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun getByGroupID(id : Int) {
-        GlobalScope.launch {
-            outputList = OutputService().getByGroupId(id)
+            sensorList = SensorService().getAll()
         }
     }
 }
