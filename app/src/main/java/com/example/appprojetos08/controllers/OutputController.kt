@@ -25,13 +25,13 @@ class OutputController {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getOutputs() {
+    fun getOutputs() {
         GlobalScope.launch {
             outputList = OutputService().getAll()
         }
     }
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getByGroupID(id : Int) {
+    fun getByGroupID(id : Int) {
         GlobalScope.launch {
             outputList = OutputService().getByGroupId(id)
         }

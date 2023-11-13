@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -185,7 +186,7 @@ class MainActivity : ComponentActivity() {
   }
   private fun getOutputByID(selectedGroupId : Int) {
     lifecycleScope.launch {
-      outputService.getByGroupId(selectedGroupId)
+      outputController.getByGroupID(selectedGroupId)
     }
   }
 
@@ -224,6 +225,13 @@ class MainActivity : ComponentActivity() {
       unselectedIcon = Icons.Default.Add,
     )
 
+    val clearFilters = NavigationItem(
+      title = "Limpar Filtros",
+      id = 101,
+      selectedIcon = Icons.Default.Clear, // Ícone para adicionar
+      unselectedIcon = Icons.Default.Clear, // Ícone para adicionar
+    )
+
     val items = groupsList.value.map { group ->
       NavigationItem(
         title = group.groupName,
@@ -232,7 +240,7 @@ class MainActivity : ComponentActivity() {
         unselectedIcon = Icons.Outlined.Star,
       )
     }
-    val allItems = items + addGroupItem
+    val allItems = items + addGroupItem + clearFilters
 
     androidx.compose.material.Surface(
       modifier = Modifier.fillMaxSize()
@@ -266,11 +274,18 @@ class MainActivity : ComponentActivity() {
                   },
                   selected = index == selectedItemIndex,
                   onClick = {
-                    selectedItemIndex = index
-                    selectedGroupId = item.id
-                    getOutputByID(selectedGroupId)
-                    scope.launch {
-                      drawerState.close()
+                    if(item.id == 101){
+                      outputController.getOutputs()
+                      scope.launch {
+                        drawerState.close()
+                      }
+                    }else{
+                      selectedItemIndex = index
+                      selectedGroupId = item.id
+                      getOutputByID(selectedGroupId)
+                      scope.launch {
+                        drawerState.close()
+                      }
                     }
                   },
                   icon = {
@@ -362,6 +377,7 @@ class MainActivity : ComponentActivity() {
   @Composable
   fun OutputCard(output: Output) {
     var groupOfOutputCard = "Sem grupo"
+    var isActive by remember { mutableStateOf(output.isActive) }
     Log.i("1", "groupController: ${groupController.groupList}")
 
     groupController.groupList.forEach { group ->
@@ -397,10 +413,9 @@ class MainActivity : ComponentActivity() {
         .padding(10.dp)
         .height(200.dp)
         .clickable {
-          val newStatus = !output.isActive
-          output.isActive = newStatus
+          isActive = !isActive
           lifecycleScope.launch {
-            OutputService().toggleOutputActiveStatus(output.outputId.toString().toInt(), newStatus)
+            OutputService().toggleOutputActiveStatus(output.outputId.toString().toInt(), isActive)
           }
         },
       shape = RoundedCornerShape(15.dp),
@@ -434,14 +449,13 @@ class MainActivity : ComponentActivity() {
         Text(
           text = "${groupOfOutputCard}",
         )
-        val updatedOutput = outputState.value
         Canvas(
           modifier = Modifier.fillMaxSize()
         ) {
           val radius = 18f
           val x = size.width - radius * 1.5f
           val y = (radius * 1.5f)
-          val color = if (updatedOutput.isActive) Color.Green else Color.Red
+          val color = if (isActive) Color.Green else Color.Red
           drawCircle(color, center = Offset(x + 6.dp.toPx(), y), radius = radius)
         }
       }

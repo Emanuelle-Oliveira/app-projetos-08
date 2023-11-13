@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -51,7 +52,6 @@ class NavigationDrawer : ComponentActivity() {
         getGroup()
         setContent {
             NavigationDrawerFun(groupsList)
-
         }
     }
 }
@@ -68,6 +68,13 @@ fun NavigationDrawerFun (groupsList: State<List<Group>>){
         unselectedIcon = Icons.Default.Add, // Ícone para adicionar
     )
 
+    val clearFilters = NavigationItem(
+        title = "Limpar Filtros",
+        id = 101,
+        selectedIcon = Icons.Default.Clear, // Ícone para adicionar
+        unselectedIcon = Icons.Default.Clear, // Ícone para adicionar
+    )
+
     val items = groupsList.value.map { group ->
         NavigationItem(
             title = group.groupName, // Assuming groupName is the property you want to use
@@ -78,11 +85,12 @@ fun NavigationDrawerFun (groupsList: State<List<Group>>){
     }
 
     // Adicione o item "Adicionar Grupo" à lista de items
-    val allItems = items + addGroupItem
+    val allItems = items + addGroupItem + clearFilters
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.LightGray
+        modifier = Modifier.fillMaxSize()
+                    .background(Color.DarkGray),
+        color = Color.DarkGray
     ) {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -90,9 +98,11 @@ fun NavigationDrawerFun (groupsList: State<List<Group>>){
             mutableStateOf(0)
         }
         ModalNavigationDrawer(
+            modifier = Modifier.background(Color.DarkGray),
             drawerContent = {
                 ModalDrawerSheet {
-                    Spacer(modifier = Modifier.height(64.dp))
+                    Spacer(modifier = Modifier.height(64.dp)
+                        .background(Color.DarkGray))
                     allItems.forEachIndexed { index, item ->
                         NavigationDrawerItem(
                             label = {
@@ -130,7 +140,7 @@ fun NavigationDrawerFun (groupsList: State<List<Group>>){
         ) {
             TopAppBar(
                 title = {
-                    Text(text = "Smart House", color = Color.White, style = TextStyle(fontSize = 20.sp))
+                    Text(text = "Smart House", color = Color.DarkGray, style = TextStyle(fontSize = 20.sp))
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.DarkGray),
                 navigationIcon = {
