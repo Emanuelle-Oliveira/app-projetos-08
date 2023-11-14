@@ -1,8 +1,8 @@
 plugins {
   id("com.android.application")
   id("org.jetbrains.kotlin.android")
-  id("com.google.gms.google-services")
   id("kotlin-parcelize")
+  id("com.google.gms.google-services")
 }
 
 android {
@@ -41,11 +41,12 @@ android {
   composeOptions {
     kotlinCompilerExtensionVersion = "1.4.3"
   }
-  packaging {
+  packagingOptions {
     resources {
-      excludes += "/META-INF/{AL2.0,LGPL2.1}"
+      excludes += setOf("META-INF/AL2.0", "META-INF/LGPL2.1")
     }
   }
+
 }
 
 dependencies {
@@ -71,4 +72,5 @@ dependencies {
   implementation("androidx.compose.material:material:1.2.0")
   implementation ("androidx.activity:activity-compose:1.3.0")
   implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0")
+
 }

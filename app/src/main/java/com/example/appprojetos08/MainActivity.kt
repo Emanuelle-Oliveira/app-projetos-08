@@ -2,6 +2,7 @@ package com.example.appprojetos08
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -77,6 +78,7 @@ import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
@@ -84,6 +86,7 @@ import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.services.sensor.SensorService
+import com.example.appprojetos08.ui.activities.CreateOutputActivity
 import com.example.appprojetos08.ui.theme.AppProjetos08Theme
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
@@ -217,6 +220,9 @@ class MainActivity : ComponentActivity() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     var selectedItemIndex by remember { mutableStateOf(0) }
 
+    val context = LocalContext.current
+
+
     // 2. Crie a função para o conteúdo do drawer
     val addGroupItem = NavigationItem(
       title = "Adicionar Grupo",
@@ -334,6 +340,7 @@ class MainActivity : ComponentActivity() {
           floatingActionButton = {
             FloatingActionButton(
               onClick = {
+                context.startActivity(Intent(context, CreateOutputActivity::class.java))
 
               },
               containerColor = Color.White,
