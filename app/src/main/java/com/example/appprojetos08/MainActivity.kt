@@ -87,6 +87,7 @@ import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.services.sensor.SensorService
 import com.example.appprojetos08.ui.activities.CreateOutputActivity
+import com.example.appprojetos08.ui.activities.group.CreateGroupActivity
 import com.example.appprojetos08.ui.theme.AppProjetos08Theme
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
@@ -340,7 +341,7 @@ class MainActivity : ComponentActivity() {
           floatingActionButton = {
             FloatingActionButton(
               onClick = {
-                context.startActivity(Intent(context, CreateOutputActivity::class.java))
+                context.startActivity(Intent(context, CreateGroupActivity::class.java))
 
               },
               containerColor = Color.White,

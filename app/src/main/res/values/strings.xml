@@ -2,4 +2,5 @@
     <string name="app_name">AppProjetos08</string>
     <string name="title_activity_navigation_drawer">NavigationDrawer</string>
     <string name="title_activity_create_output">CreateOutputActivity</string>
+    <string name="title_activity_create_group">CreateGroupActivity</string>
 </resources>

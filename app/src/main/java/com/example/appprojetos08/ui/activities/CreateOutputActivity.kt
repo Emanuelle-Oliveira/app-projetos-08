@@ -59,11 +59,7 @@ import kotlin.reflect.KFunction1
 import kotlin.reflect.KFunction4
 import kotlin.reflect.KFunction3
 
-data class ItemCreate (
-    val sensorId: Int,
-    val sensorName: String,
-    val value: String
-)
+
 
 class CreateOutputActivity : ComponentActivity() {
     private val outputController = OutputController()
@@ -292,7 +288,7 @@ class CreateOutputActivity : ComponentActivity() {
         var isSwitchOn by remember { mutableStateOf(false) }
 
         var quantity: Float = 0.0F
-        val setPointList = remember { mutableStateListOf<ItemCreate>() }
+        //val setPointList = remember { mutableStateListOf<ItemCreate>() }
 
 
         //função para customizar a cor do text field
@@ -331,100 +327,12 @@ class CreateOutputActivity : ComponentActivity() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(color = Color.Black)
-                        .border(1.dp, Color.White, RoundedCornerShape(4.dp))
-                ) {
-                    SensorDropdown(
-                        selectedSensorId = selectedSensorId,
-                        sensorsList = sensorsList.value,
-                        onSensorSelected = { sensorId ->
-                            selectedSensorId = sensorId
-                            // Você pode adicionar qualquer lógica adicional aqui, se necessário
-                        }
-                    )
-                }
 
-                if (selectedSensorId == 1) {
-                    OutlinedTextField(
-                        value = textField1Value.value,
-                        onValueChange = { textField1Value.value = it },
-                        label = { Text("ºC", color = Color.White) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(0.5f)
-                            .padding(start = 16.dp),
-                        colors = customTextFieldColors
-                    )
-                }
-
-                if (selectedSensorId == 2) {
-                    OutlinedTextField(
-                        value = textField2Value.value,
-                        onValueChange = { textField2Value.value = it },
-                        label = { Text("0% - 100%", color = Color.White) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(start = 16.dp),
-                        colors = customTextFieldColors
-                    )
-                }
-
-                if (selectedSensorId === 3) {
-                    Switch(
-                        checked = isSwitchOn,
-                        onCheckedChange = { isSwitchOn = it },
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .weight(1f)
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        selectedSensorId?.let { sensorId ->
-                            // Verificar se já existe um item para o sensor selecionado
-                            if (setPointList.none { it.sensorId == sensorId }) {
-                                sensorsList.value.find { it.sensorId == sensorId }?.let { sensor ->
-                                    val sensorName = sensor.dataType
-                                    val value = when (sensorId) {
-                                        1 -> textField1Value.value
-                                        2 -> textField2Value.value
-                                        3 -> isSwitchOn.toString()
-                                        else -> ""
-                                    }
-
-                                    setPointList.add(ItemCreate(sensorId, sensorName, value))
-                                }
-                            }
-                        }
-
-                        // Limpar os campos de texto
-                        textField1Value.value = ""
-                        textField2Value.value = ""
-
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .padding(start = 8.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Black)
-
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Add FAB",
-                        tint = Color.White,
-                    )
-
-                }
 
             }
 
             // Lista de itens adicionados
-            LazyColumn(
+            /*LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 15.dp, vertical = 16.dp),
@@ -461,10 +369,16 @@ class CreateOutputActivity : ComponentActivity() {
                 }
 
 
-            }
+            }*/
 
             Button(
                 onClick = {
+                    /*setPointList.forEach{ item ->
+                        var item =  createSetPoint( item.value, 0 , item.sensorId  )
+                    }*/
+
+
+
 
                 },
                 colors = ButtonDefaults.buttonColors(contentColor = Color.White, backgroundColor = Color.Black),
@@ -479,42 +393,5 @@ class CreateOutputActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun SensorDropdown(
-        selectedSensorId: Int?,
-        sensorsList: List<Sensor>,
-        onSensorSelected: (Int?) -> Unit
-    ) {
-        var expanded by remember { mutableStateOf(false) }
 
-        Column {
-            Text(
-                text = sensorsList.find { it.sensorId == selectedSensorId }?.dataType ?: "Sensor",
-                fontSize = 16.sp,
-                color = Color.White,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clickable { expanded = true }
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .border(1.dp, Color.Black)
-            ) {
-                sensorsList.forEach { sensor ->
-                    DropdownMenuItem(
-                        onClick = {
-                            onSensorSelected(sensor.sensorId)
-                            expanded = false
-                        }
-                    ) {
-                        Text(text = sensor.dataType)
-                    }
-                }
-            }
-        }
-    }
 }
