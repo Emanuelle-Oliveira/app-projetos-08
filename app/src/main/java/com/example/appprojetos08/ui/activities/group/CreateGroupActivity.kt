@@ -9,6 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
@@ -51,9 +53,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
+import com.example.appprojetos08.models.setPoint.SetPoint
 import com.example.appprojetos08.services.sensor.SensorService
-
-
+import com.example.appprojetos08.services.setPoint.SetPointService
+import kotlin.text.Typography.section
 
 
 data class ItemCreate (
@@ -103,6 +106,29 @@ class CreateGroupActivity : ComponentActivity() {
             outputList = OutputService().getAll()
         }
     }
+
+    private var createdSetPoint: SetPoint? = null
+    private fun createSetPoint(value: Any, groupId: Int, sensorId: Int) {
+        lifecycleScope.launch {
+            createdSetPoint = SetPointService().create(value, groupId, sensorId)
+        }
+    }
+
+    var group: Group? = null
+    private fun createGroup(name: String) {
+        lifecycleScope.launch {
+            group = GroupService().create(name)
+        }
+    }
+
+    private fun updateOutput(output:Output) {
+        lifecycleScope.launch {
+            var output = OutputService().update(output)
+        }
+    }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -281,12 +307,13 @@ class CreateGroupActivity : ComponentActivity() {
 
         val context = LocalContext.current
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 15.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 15.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -296,7 +323,8 @@ class CreateGroupActivity : ComponentActivity() {
                 ){
                     Box(
                         modifier = Modifier
-                            .weight(2f)
+                            //.weight(2f)
+                            .width(200.dp)
                             .background(color = Color.Black)
                             .border(1.dp, Color.White, RoundedCornerShape(4.dp))
                     ){
@@ -313,7 +341,7 @@ class CreateGroupActivity : ComponentActivity() {
                     androidx.compose.material.Button(
                         onClick = {
                             selectedOutputId?.let { outputId ->
-                                // Verificar se já existe um item para o sensor selecionado
+                                // Verificar se já existe um item para o output selecionado
                                 if (dropdownOutputList.none { it.outputId == outputId }) {
                                     outputList.find { it.outputId == outputId }?.let { output ->
                                         val outputName = output.outputName
@@ -323,9 +351,6 @@ class CreateGroupActivity : ComponentActivity() {
                                 }
                             }
 
-                            // Limpar os campos de texto
-                            textField1Value.value = ""
-                            textField2Value.value = ""
 
                         },
                         shape = RoundedCornerShape(16.dp),
@@ -341,10 +366,49 @@ class CreateGroupActivity : ComponentActivity() {
                         )
 
                     }
+                }
 
+            }
+
+            items(dropdownOutputList) { output ->
+                // Exibir informações do item adicionado (nome da saida)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(60.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White,
+                        contentColor = Color.DarkGray
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 100.dp
+                    ),
+                    content = {
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 10.dp),
+                            text = "Saída: ${output.outputName}",
+                            color = Color.Black,
+                            fontSize = 16.sp
+                        )
+                    }
+                )
+            }
+
+            item{
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
-                            .weight(1f)
+                            .width(130.dp)
                             .background(color = Color.Black)
                             .border(1.dp, Color.White, RoundedCornerShape(4.dp))
                     ) {
@@ -363,8 +427,7 @@ class CreateGroupActivity : ComponentActivity() {
                             onValueChange = { textField1Value.value = it },
                             label = { Text("ºC", color = Color.White) },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.5f)
+                                .width(100.dp)
                                 .padding(start = 16.dp),
                             colors = customTextFieldColors
                         )
@@ -376,9 +439,8 @@ class CreateGroupActivity : ComponentActivity() {
                             onValueChange = { textField2Value.value = it },
                             label = { Text("0% - 100%", color = Color.White) },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(start = 16.dp),
+                                .width(100.dp)
+                                .padding(start = 10.dp),
                             colors = customTextFieldColors
                         )
                     }
@@ -389,7 +451,6 @@ class CreateGroupActivity : ComponentActivity() {
                             onCheckedChange = { isSwitchOn = it },
                             modifier = Modifier
                                 .padding(start = 8.dp)
-                                .weight(1f)
                         )
                     }
 
@@ -430,10 +491,68 @@ class CreateGroupActivity : ComponentActivity() {
                         )
 
                     }
-
                 }
+
             }
 
+            items(setPointList) { setPoint ->
+                // Exibir informações do item adicionado (nome do sensor e valor)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(60.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White,
+                        contentColor = Color.DarkGray
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 100.dp
+                    ),
+                    content = {
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 10.dp),
+                            text = "Sensor: ${setPoint.sensorName}, Valor: ${setPoint.value}",
+                            color = Color.Black,
+                            fontSize = 16.sp
+                        )
+                    }
+                )
+            }
+
+            item{
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ){
+                    Button(
+                        onClick = {
+                            /*setPointList.forEach{ item ->
+                                var item =  createSetPoint( item.value, 0 , item.sensorId  )
+                            }*/
+
+
+
+
+                        },
+                        colors = ButtonDefaults.buttonColors(contentColor = Color.White, backgroundColor = Color.Black),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .padding(16.dp)
+
+                    ) {
+                        Text(text = "Salvar", color = Color.White)
+                    }
+                }
+            }
+        }
     }
 
 
