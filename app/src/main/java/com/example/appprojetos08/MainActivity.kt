@@ -77,6 +77,14 @@ class MainActivity : ComponentActivity() {
     }
   }
 
+  private var nextId: Int? = null
+  private fun getNextGroupId() {
+    lifecycleScope.launch {
+      nextId = GroupService().getNextId()
+      Log.d("Log", "nextId: $nextId")
+    }
+  }
+
   private var createdGroup: Group? = null
   private fun createGroup(name: String) {
     lifecycleScope.launch {
@@ -148,6 +156,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     getGroup()
+    //getNextGroupId()
 
     //getOutputsByGroupId(1)
     //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
