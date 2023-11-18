@@ -282,6 +282,7 @@ class CreateGroupActivity : ComponentActivity() {
     @SuppressLint("SuspiciousIndentation")
     @Composable
     fun ElementsCreateGroup(){
+        val textValueNameGroup = remember { mutableStateOf("") }
         val textField1Value = remember { mutableStateOf("") }
         val textField2Value = remember { mutableStateOf("") }
         var selectedSensorId by remember { mutableStateOf<Int?>(null) }
@@ -315,6 +316,15 @@ class CreateGroupActivity : ComponentActivity() {
                 .padding(horizontal = 15.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item{
+                OutlinedTextField(
+                    value = textValueNameGroup.value,
+                    onValueChange = { textValueNameGroup.value = it },
+                    label = { Text("Nome", color = Color.White) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = customTextFieldColors
+                )
+            }
             item {
                 Row(
                     modifier = Modifier
@@ -535,12 +545,25 @@ class CreateGroupActivity : ComponentActivity() {
                 ){
                     Button(
                         onClick = {
-                            /*setPointList.forEach{ item ->
-                                var item =  createSetPoint( item.value, 0 , item.sensorId  )
-                            }*/
-
-
-
+                              var groupId_aux : Int = 0
+                              createGroup(textValueNameGroup.value)
+                              getGroup()
+                              groupsList.value.forEach{group ->
+                                  if (group.groupName == textValueNameGroup.value){
+                                      groupId_aux = group.groupId
+                                  }
+                              }
+                              Log.i("groupteste" , groupId_aux.toString())
+                             /* setPointList.forEach{ item ->
+                                  var item =  createSetPoint( item.value, groupId_aux , item.sensorId  )
+                              }
+                              dropdownOutputList.forEach{ output ->
+                                  updateOutput(Output(output.outputId ,output.outputName , "url" + output.outputId , false , groupId_aux))
+                              }*/
+                              // Limpar os campos de texto
+                              textField1Value.value = ""
+                              textField2Value.value = ""
+                              textValueNameGroup.value = ""
 
                         },
                         colors = ButtonDefaults.buttonColors(contentColor = Color.White, backgroundColor = Color.Black),
