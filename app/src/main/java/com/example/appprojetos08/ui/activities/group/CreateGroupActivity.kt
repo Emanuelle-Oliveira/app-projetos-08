@@ -1,6 +1,7 @@
 package com.example.appprojetos08.ui.activities.group
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -51,6 +52,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import com.example.appprojetos08.MainActivity
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
 import com.example.appprojetos08.models.setPoint.SetPoint
@@ -549,6 +551,29 @@ class CreateGroupActivity : ComponentActivity() {
 
                     ) {
                         Text(text = "Salvar", color = Color.White)
+                    }
+                }
+            }
+            item{
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ){
+                    Button(
+                        onClick = {
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        },
+                        colors = ButtonDefaults.buttonColors(contentColor = Color.White, backgroundColor = Color.Black),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .padding(16.dp)
+
+                    ) {
+                        Text(text = "Voltar", color = Color.White)
                     }
                 }
             }

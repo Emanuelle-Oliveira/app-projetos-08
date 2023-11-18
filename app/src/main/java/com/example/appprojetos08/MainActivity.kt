@@ -2,9 +2,11 @@ package com.example.appprojetos08
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +27,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.ShoppingCart
@@ -38,6 +43,8 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -63,6 +70,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -266,7 +274,7 @@ class MainActivity : ComponentActivity() {
         drawerContent = {
           Surface(
             modifier = Modifier
-                    .offset(x= (-20).dp)
+              .offset(x= (-20).dp)
               .background(Color.DarkGray) // Cor de fundo do menu lateral
           ) {
             ModalDrawerSheet (modifier = Modifier.background(Color.DarkGray)){
@@ -281,17 +289,26 @@ class MainActivity : ComponentActivity() {
                   },
                   selected = index == selectedItemIndex,
                   onClick = {
-                    if(item.id == 101){
-                      outputController.getOutputs()
-                      scope.launch {
-                        drawerState.close()
+                    when (item.id) {
+                      101 -> {
+                        outputController.getOutputs()
+                        scope.launch {
+                          drawerState.close()
+                        }
                       }
-                    }else{
-                      selectedItemIndex = index
-                      selectedGroupId = item.id
-                      getOutputByID(selectedGroupId)
-                      scope.launch {
-                        drawerState.close()
+                      100 -> {
+                        context.startActivity(Intent(context, CreateGroupActivity::class.java))
+                        scope.launch {
+                          drawerState.close()
+                        }
+                      }
+                      else -> {
+                        selectedItemIndex = index
+                        selectedGroupId = item.id
+                        getOutputByID(selectedGroupId)
+                        scope.launch {
+                          drawerState.close()
+                        }
                       }
                     }
                   },
@@ -338,22 +355,6 @@ class MainActivity : ComponentActivity() {
               }
             )
           },
-          floatingActionButton = {
-            FloatingActionButton(
-              onClick = {
-                context.startActivity(Intent(context, CreateGroupActivity::class.java))
-
-              },
-              containerColor = Color.White,
-              contentColor = Color.DarkGray,
-            ) {
-              Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Adicionar Saída",
-                tint = Color.DarkGray
-              )
-            }
-          }
         ) {
           // Fundo preto da tela
           Spacer(modifier = Modifier.height(8.dp))
@@ -435,25 +436,33 @@ class MainActivity : ComponentActivity() {
         defaultElevation = 100.dp
       )
     ) {
+      Box(
+        modifier = Modifier
+          .padding(start = 120.dp)
+        //.align(Alignment.TopEnd)
+      ){
+        MenuTresPontos()
+      }
       Column(
         modifier = Modifier
           .fillMaxSize()
-          .padding(16.dp),
-
-        ) {
+          .padding(12.dp)
+          //.height(10.dp)
+          .absoluteOffset(x=0.dp, y= (-20).dp)
+      ) {
         Icon(
           painter = painterResource(R.drawable.power_settings_new),
           contentDescription = "Icone desligar/ligar saída",
           modifier = Modifier
-            .size(110.dp)
-            .padding(10.dp)
+            .size(89.dp)
+            .padding(8.dp)
             .align(Alignment.CenterHorizontally)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(1.dp))
         Text(
           text = "${output.outputName}", // Substitua pelo nome do dispositivo
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(1.dp))
         Text(
           text = "${groupOfOutputCard}",
         )
@@ -471,5 +480,30 @@ class MainActivity : ComponentActivity() {
   }
 }
 
+@Composable
+fun MenuTresPontos() {
+  val contexto: Context = LocalContext.current
+  var isOpened: Boolean by remember { mutableStateOf(false) }
 
-
+  Box(modifier = Modifier
+    .wrapContentSize(Alignment.TopEnd)
+    .padding(start = 16.dp)
+  ) {
+    IconButton(onClick = { isOpened = !isOpened }) {
+      Icon(
+        imageVector = Icons.Default.MoreVert,
+        contentDescription = "More vert"
+      )
+    }
+    DropdownMenu(expanded = isOpened, onDismissRequest = { isOpened = false }) {
+      DropdownMenuItem(text = { Text(text = "Editar Saída") }, onClick = {
+        Toast.makeText(contexto, "Folhas Secas", Toast.LENGTH_LONG).show()
+        isOpened = !isOpened
+      })
+      DropdownMenuItem(text = { Text(text = "Editar grupo") }, onClick = {
+        Toast.makeText(contexto, "Em breve.....", Toast.LENGTH_LONG).show()
+        isOpened = !isOpened
+      })
+    }
+  }
+}
