@@ -129,7 +129,12 @@ class CreateGroupActivity : ComponentActivity() {
         }
     }
 
-
+    private var nextId: Int? = null
+    private fun getNextGroupId() {
+        lifecycleScope.launch {
+            nextId = GroupService().getNextId()
+        }
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,6 +142,7 @@ class CreateGroupActivity : ComponentActivity() {
         getGroup()
         getSensor()
         getOutputs()
+        getNextGroupId()
         setContent {
             NewGroupScreen()
         }
@@ -545,21 +551,24 @@ class CreateGroupActivity : ComponentActivity() {
                 ){
                     Button(
                         onClick = {
-                              var groupId_aux : Int = 0
                               createGroup(textValueNameGroup.value)
-                              getGroup()
-                              groupsList.value.forEach{group ->
-                                  if (group.groupName == textValueNameGroup.value){
-                                      groupId_aux = group.groupId
+                              setPointList.forEach{ item ->
+                                  if (item.sensorId == 3){
+                                      var valueBool = item.value.toBoolean()
+                                      nextId?.let { createSetPoint( valueBool, it, item.sensorId  ) }
+                                  }else{
+                                      var valFl = item.value.toFloat()
+                                      nextId?.let { createSetPoint( valFl, it, item.sensorId  ) }
                                   }
-                              }
-                              Log.i("groupteste" , groupId_aux.toString())
-                             /* setPointList.forEach{ item ->
-                                  var item =  createSetPoint( item.value, groupId_aux , item.sensorId  )
+
                               }
                               dropdownOutputList.forEach{ output ->
-                                  updateOutput(Output(output.outputId ,output.outputName , "url" + output.outputId , false , groupId_aux))
-                              }*/
+                                  nextId?.let {
+                                      Output(output.outputId ,output.outputName , "url" + output.outputId , false ,
+                                          it
+                                      )
+                                  }?.let { updateOutput(it) }
+                              }
                               // Limpar os campos de texto
                               textField1Value.value = ""
                               textField2Value.value = ""

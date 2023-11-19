@@ -41,6 +41,20 @@ class GroupService {
     group
   }
 
+  suspend fun getNextId(): Int? = coroutineScope {
+    try {
+      val result = db.collection("lastGroupId").get().await()
+      val lastId = result.first().data["lastGroupId"]
+      val nextId = (lastId as Number).toInt() + 1
+
+      Log.d("Log", "Id encontrado com sucesso.")
+      nextId
+    } catch (e: Exception) {
+      Log.w("Log", "Erro ao buscar no banco de dados.", e)
+      null
+    }
+  }
+
   suspend fun create(name: String): Group? = coroutineScope {
     var group: Group? = null
     try {
