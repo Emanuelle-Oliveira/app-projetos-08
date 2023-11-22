@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -13,9 +14,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -28,61 +29,34 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import com.example.appprojetos08.NavigationItem
-import com.example.appprojetos08.controllers.GroupController
-import com.example.appprojetos08.controllers.OutputController
-import com.example.appprojetos08.controllers.sensor.SensorController
-import com.example.appprojetos08.models.group.Group
-import com.example.appprojetos08.services.group.GroupService
-import com.example.appprojetos08.services.output.OutputService
-import com.example.appprojetos08.ui.activities.group.ui.theme.AppProjetos08Theme
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.material3.*
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
 import com.example.appprojetos08.MainActivity
+import com.example.appprojetos08.NavigationItem
+import com.example.appprojetos08.controllers.OutputController
+import com.example.appprojetos08.models.group.Group
 import com.example.appprojetos08.models.output.Output
 import com.example.appprojetos08.models.sensor.Sensor
 import com.example.appprojetos08.models.setPoint.SetPoint
+import com.example.appprojetos08.services.group.GroupService
+import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.services.sensor.SensorService
 import com.example.appprojetos08.services.setPoint.SetPointService
-import kotlin.text.Typography.section
+import kotlinx.coroutines.launch
 
-
-data class ItemCreate (
-    val sensorId: Int,
-    val sensorName: String,
-    val value: String
-)
-
-data class ItemOutput (
-    val outputId: Int,
-    val outputName: String
-)
-
-class CreateGroupActivity : ComponentActivity() {
+class UpdateGroupActivity : ComponentActivity() {
     private val outputController = OutputController()
-    private val sensorController = SensorController()
-    private val groupController = GroupController()
-    private val outputService = OutputService()
-
-
-    private val db = Firebase.firestore
 
     private val groupsList = mutableStateOf(emptyList<Group>())
+    private val setPointsList = mutableStateOf(emptyList<SetPoint>())
     private val sensorsList = mutableStateOf(emptyList<Sensor>())
+    private val outputsList = mutableStateOf(emptyList<Output>())
     var outputList = mutableListOf<Output>()
 
     private fun getGroup() {
@@ -93,7 +67,14 @@ class CreateGroupActivity : ComponentActivity() {
 
     private fun getOutputByID(selectedGroupId: Int) {
         lifecycleScope.launch {
-            outputController.getByGroupID(selectedGroupId)
+            //outputController.getByGroupID(selectedGroupId)
+            outputsList.value = OutputService().getByGroupId(selectedGroupId)
+        }
+    }
+
+    private fun getByGroupId(selectedGroupId: Int) {
+        lifecycleScope.launch {
+           setPointsList.value = SetPointService().getByGroupId(selectedGroupId)
         }
     }
 
@@ -109,23 +90,9 @@ class CreateGroupActivity : ComponentActivity() {
         }
     }
 
-    private var createdSetPoint: SetPoint? = null
-    private fun createSetPoint(value: Any, groupId: Int, sensorId: Int) {
+    private fun updateGroup(group: Group) {
         lifecycleScope.launch {
-            createdSetPoint = SetPointService().create(value, groupId, sensorId)
-        }
-    }
-
-    var group: Group? = null
-    private fun createGroup(name: String) {
-        lifecycleScope.launch {
-            group = GroupService().create(name)
-        }
-    }
-
-    private fun updateOutput(output:Output) {
-        lifecycleScope.launch {
-            var output = OutputService().update(output)
+            val updatedGroup = GroupService().update(group)
         }
     }
 
@@ -136,22 +103,55 @@ class CreateGroupActivity : ComponentActivity() {
         }
     }
 
+    private fun updateOutput(output:Output) {
+        lifecycleScope.launch {
+            var output = OutputService().update(output)
+        }
+    }
+
+    private fun updateSetPoint(setPoint:SetPoint) {
+        lifecycleScope.launch {
+            var setPoint = SetPointService().update(setPoint)
+        }
+    }
+
+    private var createdSetPoint: SetPoint? = null
+    private fun createSetPoint(value: Any, groupId: Int, sensorId: Int) {
+        lifecycleScope.launch {
+            createdSetPoint = SetPointService().create(value, groupId, sensorId)
+        }
+    }
+
+    private fun deleteSetPoint(id: Int) {
+        lifecycleScope.launch {
+            SetPointService().delete(id)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val groupUpdate = intent.extras?.getParcelable<Group>("groupAux")
+        Log.i("Teste", groupUpdate.toString())
+        if (groupUpdate != null) {
+            getByGroupId(groupUpdate.groupId)
+        }
+        if (groupUpdate != null) {
+            getOutputByID(groupUpdate.groupId)
+        }
         getGroup()
         getSensor()
         getOutputs()
         getNextGroupId()
         setContent {
-            NewGroupScreen()
+            UpdateGroupScreen(groupUpdate)
         }
     }
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun NewGroupScreen(){
+    fun UpdateGroupScreen(groupUpdate: Group?) {
         val scope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         var selectedItemIndex by remember { mutableStateOf(0) }
@@ -277,20 +277,19 @@ class CreateGroupActivity : ComponentActivity() {
                         color = Color.DarkGray,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        ElementsCreateGroup()
-
+                        ElementsUpdateGroup(groupUpdate)
                     }
                 }
             }
         }
     }
 
-    @SuppressLint("SuspiciousIndentation")
     @Composable
-    fun ElementsCreateGroup(){
-        val textValueNameGroup = remember { mutableStateOf("") }
+    fun ElementsUpdateGroup(groupUpdate: Group?) {
+        val textValueNameGroup = remember { groupUpdate?.let { mutableStateOf(it.groupName) } }
         val textField1Value = remember { mutableStateOf("") }
         val textField2Value = remember { mutableStateOf("") }
+
         var selectedSensorId by remember { mutableStateOf<Int?>(null) }
         var selectedOutputId by remember { mutableStateOf<Int?>(null) }
 
@@ -301,6 +300,23 @@ class CreateGroupActivity : ComponentActivity() {
         var quantity: Float = 0.0F
         val setPointList = remember { mutableStateListOf<ItemCreate>() }
         val dropdownOutputList = remember { mutableStateListOf<ItemOutput>() }
+
+        setPointsList.value.forEach{ setPoint ->
+            if(setPoint.sensorId == 3){
+                setPointList.add(ItemCreate(setPoint.sensorId , "Movimento" , setPoint.valueBoolean.toString()))
+            }
+            if(setPoint.sensorId == 2){
+                setPointList.add(ItemCreate(setPoint.sensorId , "Umidade" , setPoint.valueFloat.toString()))
+            }
+            if(setPoint.sensorId == 1){
+                setPointList.add(ItemCreate(setPoint.sensorId , "Temperatura" , setPoint.valueFloat.toString()))
+            }
+        }
+
+        outputsList.value.forEach{output ->
+            dropdownOutputList.add(ItemOutput(output.outputId , output.outputName))
+        }
+
 
 
         //função para customizar a cor do text field
@@ -323,13 +339,15 @@ class CreateGroupActivity : ComponentActivity() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item{
-                OutlinedTextField(
-                    value = textValueNameGroup.value,
-                    onValueChange = { textValueNameGroup.value = it },
-                    label = { Text("Nome", color = Color.White) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = customTextFieldColors
-                )
+                if (textValueNameGroup != null) {
+                    androidx.compose.material.OutlinedTextField(
+                        value = textValueNameGroup.value,
+                        onValueChange = { textValueNameGroup.value = it },
+                        label = { Text("Nome", color = Color.White) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = customTextFieldColors
+                    )
+                }
             }
             item {
                 Row(
@@ -404,14 +422,32 @@ class CreateGroupActivity : ComponentActivity() {
                         defaultElevation = 100.dp
                     ),
                     content = {
-                        Text(
+                        Row(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 10.dp),
-                            text = "Saída: ${output.outputName}",
-                            color = Color.Black,
-                            fontSize = 16.sp
-                        )
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = "Saída: ${output.outputName}",
+                                color = Color.Black,
+                                fontSize = 16.sp
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    dropdownOutputList.remove(output)
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Excluir",
+                                    tint = Color.Red
+                                )
+                            }
+                        }
                     }
                 )
             }
@@ -485,12 +521,10 @@ class CreateGroupActivity : ComponentActivity() {
                                             3 -> isSwitchOn.toString()
                                             else -> ""
                                         }
-
                                         setPointList.add(ItemCreate(sensorId, sensorName, value))
                                     }
                                 }
                             }
-
                             // Limpar os campos de texto
                             textField1Value.value = ""
                             textField2Value.value = ""
@@ -527,18 +561,37 @@ class CreateGroupActivity : ComponentActivity() {
                     ),
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 100.dp
-                    ),
-                    content = {
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
+                                .align(Alignment.CenterVertically)
                                 .padding(top = 10.dp),
                             text = "Sensor: ${setPoint.sensorName}, Valor: ${setPoint.value}",
                             color = Color.Black,
                             fontSize = 16.sp
                         )
+
+                        IconButton(
+                            onClick = {
+                                setPointList.remove(setPoint)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Excluir",
+                                tint = Color.Red
+                            )
+                        }
                     }
-                )
+                }
             }
 
             item{
@@ -549,31 +602,76 @@ class CreateGroupActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ){
-                    Button(
+                    androidx.compose.material.Button(
                         onClick = {
-                              createGroup(textValueNameGroup.value)
-                              setPointList.forEach{ item ->
-                                  if (item.sensorId == 3){
-                                      var valueBool = item.value.toBoolean()
-                                      nextId?.let { createSetPoint( valueBool, it, item.sensorId  ) }
-                                  }else{
-                                      var valFl = item.value.toFloat()
-                                      nextId?.let { createSetPoint( valFl, it, item.sensorId  ) }
-                                  }
+                            if (textValueNameGroup != null) {
+                                if (groupUpdate != null) {
+                                    Log.i("nometeste", groupUpdate.groupId.toString() )
+                                    val attGroup  = Group(
+                                        groupUpdate.groupId ,
+                                        textValueNameGroup.value,
+                                        groupUpdate.isActive
+                                    )
+                                    updateGroup(attGroup)
+                                }
+                            }
 
-                              }
-                              dropdownOutputList.forEach{ output ->
-                                  nextId?.let {
-                                      Output(output.outputId ,output.outputName , "url" + output.outputId , false ,
-                                          it
-                                      )
-                                  }?.let { updateOutput(it) }
-                              }
-                              // Limpar os campos de texto
-                              textField1Value.value = ""
-                              textField2Value.value = ""
-                              textValueNameGroup.value = ""
 
+                            /*setPointList.forEach { item ->
+                                val matchingSetPoint = setPointsList.value.find { it.sensorId == item.sensorId }
+
+                                if (matchingSetPoint != null) {
+                                    // SetPoint já existe, então atualize-o apenas se o valor for diferente
+                                    if (item.sensorId == 3 && item.value.toBoolean() != matchingSetPoint.valueBoolean) {
+                                        val updatedSetPoint = SetPoint(
+                                            matchingSetPoint.setPointId,
+                                            null,
+                                            item.value.toBoolean(),
+                                            matchingSetPoint.groupId,
+                                            item.sensorId
+                                        )
+                                        updateSetPoint(updatedSetPoint)
+                                    } else if (item.sensorId != 3 && item.value.toFloat() != matchingSetPoint.valueFloat) {
+                                        val updatedSetPoint = SetPoint(
+                                            matchingSetPoint.setPointId,
+                                            item.value.toFloat(),
+                                            null,
+                                            matchingSetPoint.groupId,
+                                            item.sensorId
+                                        )
+                                        updateSetPoint(updatedSetPoint)
+                                    }
+                                } else {
+                                    // SetPoint não existe, então crie um novo
+                                    if (item.sensorId == 3) {
+                                        createSetPoint(item.value.toBoolean(), nextId ?: 0, item.sensorId)
+                                    } else {
+                                        createSetPoint(item.value.toFloat(), nextId ?: 0, item.sensorId)
+                                    }
+                                }
+                            }
+
+                            setPointsList.value.forEach { existingSetPoint ->
+                                val matchingItem = setPointList.find { it.sensorId == existingSetPoint.sensorId }
+                                if (matchingItem == null) {
+                                    // O SetPoint não está presente em setPointList, então exclua-o
+                                    deleteSetPoint(existingSetPoint.setPointId)
+                                }
+                            }*/
+
+                            dropdownOutputList.forEach{ output ->
+                                groupUpdate?.let {
+                                    Output(output.outputId ,output.outputName , "url" + output.outputId , false ,
+                                        it.groupId
+                                    )
+                                }?.let { updateOutput(it) }
+                            }
+                            // Limpar os campos de texto
+                            textField1Value.value = ""
+                            textField2Value.value = ""
+                            if (textValueNameGroup != null) {
+                                textValueNameGroup.value = ""
+                            }
                             context.startActivity(Intent(context, MainActivity::class.java))
 
                         },
@@ -596,7 +694,7 @@ class CreateGroupActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ){
-                    Button(
+                    androidx.compose.material.Button(
                         onClick = {
                             context.startActivity(Intent(context, MainActivity::class.java))
                         },
@@ -613,7 +711,6 @@ class CreateGroupActivity : ComponentActivity() {
             }
         }
     }
-
 
     @Composable
     fun SensorDropdown(

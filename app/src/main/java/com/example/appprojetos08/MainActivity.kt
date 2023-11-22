@@ -2,7 +2,6 @@ package com.example.appprojetos08
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,10 +9,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,18 +35,14 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.rounded.ShoppingCart
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -62,7 +55,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,39 +62,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.example.appprojetos08.controllers.GroupController
 import com.example.appprojetos08.controllers.OutputController
 import com.example.appprojetos08.models.group.Group
 import com.example.appprojetos08.models.output.Output
-import com.example.appprojetos08.models.sensor.Sensor
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
-import com.example.appprojetos08.services.sensor.SensorService
-import com.example.appprojetos08.ui.activities.CreateOutputActivity
 import com.example.appprojetos08.ui.activities.group.CreateGroupActivity
-import com.example.appprojetos08.ui.theme.AppProjetos08Theme
+import com.example.appprojetos08.ui.activities.group.UpdateGroupActivity
 import com.google.firebase.Firebase
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.*
+import kotlin.reflect.KFunction1
 
 
 class MainActivity : ComponentActivity() {
@@ -199,6 +180,12 @@ class MainActivity : ComponentActivity() {
   private fun getOutputByID(selectedGroupId : Int) {
     lifecycleScope.launch {
       outputController.getByGroupID(selectedGroupId)
+    }
+  }
+
+  private fun deleteGroup(id: Int) {
+    lifecycleScope.launch {
+      GroupService().delete(id)
     }
   }
 
@@ -386,6 +373,7 @@ class MainActivity : ComponentActivity() {
   @Composable
   fun OutputCard(output: Output) {
     var groupOfOutputCard = "Sem grupo"
+    var groupAux : Group? = null
     var isActive by remember { mutableStateOf(output.isActive) }
     Log.i("1", "groupController: ${groupController.groupList}")
 
@@ -394,6 +382,7 @@ class MainActivity : ComponentActivity() {
       if (output.groupId == group.groupId) {
         Log.i("1", "Entrou if")
         groupOfOutputCard = group.groupName
+        groupAux = group
       }
     }
     val docRef = db.collection("outputs").document(output.outputId.toString())
@@ -418,9 +407,9 @@ class MainActivity : ComponentActivity() {
     }
     Card(
       modifier = Modifier
-        .width(185.dp)
+        .width(162.dp)
         .padding(10.dp)
-        .height(200.dp)
+        .height(212.dp)
         .clickable {
           isActive = !isActive
           lifecycleScope.launch {
@@ -438,10 +427,10 @@ class MainActivity : ComponentActivity() {
     ) {
       Box(
         modifier = Modifier
-          .padding(start = 120.dp)
+          .padding(start = 90.dp)
         //.align(Alignment.TopEnd)
       ){
-        MenuTresPontos()
+        MenuTresPontos(groupAux , ::deleteGroup)
       }
       Column(
         modifier = Modifier
@@ -481,8 +470,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MenuTresPontos() {
-  val contexto: Context = LocalContext.current
+fun MenuTresPontos(groupAux: Group?, deleteGroup: KFunction1<Int, Unit>) {
+  val context = LocalContext.current
   var isOpened: Boolean by remember { mutableStateOf(false) }
 
   Box(modifier = Modifier
@@ -497,11 +486,24 @@ fun MenuTresPontos() {
     }
     DropdownMenu(expanded = isOpened, onDismissRequest = { isOpened = false }) {
       DropdownMenuItem(text = { Text(text = "Editar Saída") }, onClick = {
-        Toast.makeText(contexto, "Folhas Secas", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Folhas Secas", Toast.LENGTH_LONG).show()
         isOpened = !isOpened
       })
       DropdownMenuItem(text = { Text(text = "Editar grupo") }, onClick = {
-        Toast.makeText(contexto, "Em breve.....", Toast.LENGTH_LONG).show()
+        var mochila = Bundle()
+        mochila.putParcelable("groupAux", groupAux)
+
+        val intent = Intent(context, UpdateGroupActivity::class.java)
+        intent.putExtras(mochila)
+
+        context.startActivity(intent)
+        isOpened = !isOpened
+      })
+      DropdownMenuItem(text = { Text(text = "Excluir grupo") }, onClick = {
+        if (groupAux != null) {
+          deleteGroup(groupAux.groupId)
+        }
+        context.startActivity(Intent(context, MainActivity::class.java))
         isOpened = !isOpened
       })
     }

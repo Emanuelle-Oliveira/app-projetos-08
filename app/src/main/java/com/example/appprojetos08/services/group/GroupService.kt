@@ -96,6 +96,7 @@ class GroupService {
     try {
       db.collection("group").document(id.toString()).delete().await()
       Log.d("Log", "Grupo deletado com sucesso.")
+      id
     } catch (e: Exception) {
       Log.w("Log", "Erro ao buscar no banco de dados.", e)
     }

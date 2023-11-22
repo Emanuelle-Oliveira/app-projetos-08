@@ -93,7 +93,6 @@ class SetPointService {
         try {
             db.collection("setPoint").document(id.toString()).delete().await()
             Log.d("Log", "Set point deletado com sucesso.")
-            id
         } catch (e: Exception) {
             Log.w("Log", "Erro ao deletar no banco de dados.", e)
             null
