@@ -661,7 +661,7 @@ class UpdateGroupActivity : ComponentActivity() {
 
                             dropdownOutputList.forEach{ output ->
                                 groupUpdate?.let {
-                                    Output(output.outputId ,output.outputName , "url" + output.outputId , false ,
+                                    Output(output.outputId ,output.outputName , "url" + output.outputId , false , false,
                                         it.groupId
                                     )
                                 }?.let { updateOutput(it) }

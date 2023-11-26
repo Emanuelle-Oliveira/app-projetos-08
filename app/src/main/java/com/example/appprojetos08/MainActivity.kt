@@ -420,8 +420,11 @@ class MainActivity : ComponentActivity() {
         .height(212.dp)
         .clickable {
           isActive = !isActive
+          output.isActive = !output.isActive
+          output.isManual = !output.isManual
+          
           lifecycleScope.launch {
-            OutputService().toggleOutputActiveStatus(output.outputId.toString().toInt(), isActive)
+            OutputService().update(output)
           }
         },
       shape = RoundedCornerShape(15.dp),
