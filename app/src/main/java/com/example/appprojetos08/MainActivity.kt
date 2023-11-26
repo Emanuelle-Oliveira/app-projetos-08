@@ -5,7 +5,6 @@ import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -80,6 +79,7 @@ import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.ui.activities.group.CreateGroupActivity
 import com.example.appprojetos08.ui.activities.group.UpdateGroupActivity
+import com.example.appprojetos08.ui.activities.output.UpdateOutputActivity
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.*
@@ -177,6 +177,12 @@ class MainActivity : ComponentActivity() {
       groupsList.value = GroupService().getAll()
     }
   }
+
+  private fun getOutputs() {
+    lifecycleScope.launch {
+      outputsList.value = OutputService().getAll()
+    }
+  }
   private fun getOutputByID(selectedGroupId : Int) {
     lifecycleScope.launch {
       outputController.getByGroupID(selectedGroupId)
@@ -192,6 +198,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     getGroup()
+    getOutputs()
     //getOutputs()
     //getOutputsByGroupId(1)
     //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
@@ -217,7 +224,6 @@ class MainActivity : ComponentActivity() {
     var selectedItemIndex by remember { mutableStateOf(0) }
 
     val context = LocalContext.current
-
 
     // 2. Crie a função para o conteúdo do drawer
     val addGroupItem = NavigationItem(
@@ -357,7 +363,7 @@ class MainActivity : ComponentActivity() {
                 Row(
                   modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp, bottom = 12.dp)
+                    .padding(start = 24.dp, bottom = 12.dp)
                 ) {
                   for (output in chunkedOutputs) {
                     OutputCard(output = output)
@@ -374,6 +380,7 @@ class MainActivity : ComponentActivity() {
   fun OutputCard(output: Output) {
     var groupOfOutputCard = "Sem grupo"
     var groupAux : Group? = null
+    var outputAux : Output? = null
     var isActive by remember { mutableStateOf(output.isActive) }
     Log.i("1", "groupController: ${groupController.groupList}")
 
@@ -385,6 +392,7 @@ class MainActivity : ComponentActivity() {
         groupAux = group
       }
     }
+    outputAux = output
     val docRef = db.collection("outputs").document(output.outputId.toString())
     val outputState = remember { mutableStateOf(output) }
 
@@ -430,7 +438,7 @@ class MainActivity : ComponentActivity() {
           .padding(start = 90.dp)
         //.align(Alignment.TopEnd)
       ){
-        MenuTresPontos(groupAux , ::deleteGroup)
+        MenuTresPontos(outputAux,groupAux , ::deleteGroup)
       }
       Column(
         modifier = Modifier
@@ -470,7 +478,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MenuTresPontos(groupAux: Group?, deleteGroup: KFunction1<Int, Unit>) {
+fun MenuTresPontos(outputAux: Output?, groupAux: Group?, deleteGroup: KFunction1<Int, Unit>) {
   val context = LocalContext.current
   var isOpened: Boolean by remember { mutableStateOf(false) }
 
@@ -486,7 +494,14 @@ fun MenuTresPontos(groupAux: Group?, deleteGroup: KFunction1<Int, Unit>) {
     }
     DropdownMenu(expanded = isOpened, onDismissRequest = { isOpened = false }) {
       DropdownMenuItem(text = { Text(text = "Editar Saída") }, onClick = {
-        Toast.makeText(context, "Folhas Secas", Toast.LENGTH_LONG).show()
+        var mochila = Bundle()
+        mochila.putParcelable("groupAux", groupAux)
+        mochila.putParcelable("outputAux",outputAux)
+
+        val intent = Intent(context, UpdateOutputActivity::class.java)
+        intent.putExtras(mochila)
+
+        context.startActivity(intent)
         isOpened = !isOpened
       })
       DropdownMenuItem(text = { Text(text = "Editar grupo") }, onClick = {

@@ -74,7 +74,7 @@ class UpdateGroupActivity : ComponentActivity() {
 
     private fun getByGroupId(selectedGroupId: Int) {
         lifecycleScope.launch {
-           setPointsList.value = SetPointService().getByGroupId(selectedGroupId)
+            setPointsList.value = SetPointService().getByGroupId(selectedGroupId)
         }
     }
 
