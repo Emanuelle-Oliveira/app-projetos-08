@@ -56,15 +56,4 @@ class OutputService {
     }
     output
   }
-  suspend fun toggleOutputActiveStatus(outputId: Int, newStatus: Boolean) = coroutineScope {
-    try {
-      db.collection("output")
-        .document(outputId.toString())
-        .update("isActive", newStatus)
-        .await()
-    } catch (e: Exception) {
-      Log.w("Log", "Erro ao atualizar o status no banco de dados.", e)
-    }
-  }
-
 }
