@@ -93,83 +93,6 @@ class MainActivity : ComponentActivity() {
   private val outputService = OutputService()
   private val db = Firebase.firestore
 
-  /*
-  TESTES DAS FUNÇÔES PARA EXEMPLO
-
-  OUTPUT:
-  var outputList = mutableListOf<Output>()
-
-  private fun getOutputs() {
-    lifecycleScope.launch {
-      outputList = OutputService().getAll()
-      Log.d("Log", "Lista de saídas: $outputList")
-    }
-  }
-
-  private fun getOutputsByGroupId(id: Int) {
-    lifecycleScope.launch {
-      outputList = OutputService().getByGroupId(id)
-      Log.d("Log", "Lista de saídas: $outputList")
-    }
-  }
-
-  private fun updateOutput(output:Output) {
-    lifecycleScope.launch {
-      var output = OutputService().update(output)
-      Log.d("Log", "Saída atualizada: $output")
-    }
-  }
-
-  SENSOR:
-  var sensorList = mutableListOf<Sensor>()
-
-  private fun getSensors() {
-    lifecycleScope.launch {
-      sensorList = SensorService().getAll()
-      Log.d("Log", "Lista de sensores: $sensorList")
-    }
-  }
-
-  GROUP:
-  var groupList = mutableListOf<Group>()
-  private fun getGroups() {
-    lifecycleScope.launch {
-      groupList = GroupService().getAll()
-      Log.d("Log", "Lista de grupos: $groupList")
-    }
-  }
-
-  var group: Group? = null
-  private fun getGroup(id: Int) {
-    lifecycleScope.launch {
-      group = GroupService().getOne(id)
-      Log.d("Log", "Grupo: $group")
-    }
-  }
-
-  private fun createGroup(name: String) {
-    lifecycleScope.launch {
-      group = GroupService().create(name)
-      Log.d("Log", "Grupo: $group")
-    }
-  }
-
-  private fun updateGroup(group: Group) {
-    lifecycleScope.launch {
-
-      val updatedGroup = GroupService().update(group)
-      Log.d("Log", "Grupo: updatedGroup")
-    }
-  }
-
-   private fun deleteGroup(id: Int) {
-    lifecycleScope.launch {
-
-      GroupService().delete(id)
-      Log.d("Log", "Grupo deletado")
-    }
-  }
-  */
   private val groupsList = mutableStateOf(emptyList<Group>())
   private val outputsList = mutableStateOf(outputController.outputList)
   private fun getGroup() {
@@ -192,17 +115,6 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     getGroup()
-    //getOutputs()
-    //getOutputsByGroupId(1)
-    //updateOutput(Output(1, "Lâmpada", "url1", true, 1))
-
-    //getSensors()
-
-    //getGroups()
-    //getGroup(0)
-    //createGroup("Cozinha")
-    //updateGroup(Group(3, "Quarto", true))
-    //deleteGroup(2)
     setContent {
       HomeScreenStructure()
     }
@@ -230,8 +142,8 @@ class MainActivity : ComponentActivity() {
     val clearFilters = NavigationItem(
       title = "Limpar Filtros",
       id = 101,
-      selectedIcon = Icons.Default.Clear, // Ícone para adicionar
-      unselectedIcon = Icons.Default.Clear, // Ícone para adicionar
+      selectedIcon = Icons.Default.Clear,
+      unselectedIcon = Icons.Default.Clear,
     )
 
     val items = groupsList.value.map { group ->
@@ -262,7 +174,7 @@ class MainActivity : ComponentActivity() {
           Surface(
             modifier = Modifier
               .offset(x= (-20).dp)
-              .background(Color.DarkGray) // Cor de fundo do menu lateral
+              .background(Color.DarkGray)
           ) {
             ModalDrawerSheet (modifier = Modifier.background(Color.DarkGray)){
               Spacer(modifier = Modifier.height(64.dp))
@@ -343,7 +255,6 @@ class MainActivity : ComponentActivity() {
             )
           },
         ) {
-          // Fundo preto da tela
           Spacer(modifier = Modifier.height(8.dp))
           Surface(
             color = Color.DarkGray,
@@ -352,7 +263,6 @@ class MainActivity : ComponentActivity() {
             LazyColumn(
               contentPadding = PaddingValues(18.dp)
             ) {
-              // Divide os cards em duas colunas
               items(outputController.outputList.chunked(2)) { chunkedOutputs ->
                 Row(
                   modifier = Modifier
@@ -375,12 +285,9 @@ class MainActivity : ComponentActivity() {
     var groupOfOutputCard = "Sem grupo"
     var groupAux : Group? = null
     var isActive by remember { mutableStateOf(output.isActive) }
-    Log.i("1", "groupController: ${groupController.groupList}")
 
     groupController.groupList.forEach { group ->
-      Log.i("1", "groupId output: ${output.groupId} e groupId Group: ${group.groupId}")
       if (output.groupId == group.groupId) {
-        Log.i("1", "Entrou if")
         groupOfOutputCard = group.groupName
         groupAux = group
       }
@@ -391,7 +298,6 @@ class MainActivity : ComponentActivity() {
     LaunchedEffect(Unit) {
       val listener = docRef.addSnapshotListener { documentSnapshot, e ->
         if (e != null) {
-          Log.w(TAG, "listen:error", e)
           return@addSnapshotListener
         }
         if (documentSnapshot != null && documentSnapshot.exists()) {
@@ -401,9 +307,6 @@ class MainActivity : ComponentActivity() {
           }
         }
       }
-//      onDispose {
-//        listener.remove()
-//      }
     }
     Card(
       modifier = Modifier
@@ -412,8 +315,10 @@ class MainActivity : ComponentActivity() {
         .height(212.dp)
         .clickable {
           isActive = !isActive
+          output.isActive = !output.isActive
+          output.isManual = !output.isManual
           lifecycleScope.launch {
-            OutputService().toggleOutputActiveStatus(output.outputId.toString().toInt(), isActive)
+            OutputService().update(output)
           }
         },
       shape = RoundedCornerShape(15.dp),
@@ -428,7 +333,6 @@ class MainActivity : ComponentActivity() {
       Box(
         modifier = Modifier
           .padding(start = 90.dp)
-        //.align(Alignment.TopEnd)
       ){
         MenuTresPontos(groupAux , ::deleteGroup)
       }
@@ -436,7 +340,6 @@ class MainActivity : ComponentActivity() {
         modifier = Modifier
           .fillMaxSize()
           .padding(12.dp)
-          //.height(10.dp)
           .absoluteOffset(x=0.dp, y= (-20).dp)
       ) {
         Icon(
@@ -449,7 +352,7 @@ class MainActivity : ComponentActivity() {
         )
         Spacer(modifier = Modifier.height(1.dp))
         Text(
-          text = "${output.outputName}", // Substitua pelo nome do dispositivo
+          text = "${output.outputName}",
         )
         Spacer(modifier = Modifier.height(1.dp))
         Text(

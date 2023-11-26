@@ -132,7 +132,6 @@ class UpdateGroupActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val groupUpdate = intent.extras?.getParcelable<Group>("groupAux")
-        Log.i("Teste", groupUpdate.toString())
         if (groupUpdate != null) {
             getByGroupId(groupUpdate.groupId)
         }
@@ -606,7 +605,6 @@ class UpdateGroupActivity : ComponentActivity() {
                         onClick = {
                             if (textValueNameGroup != null) {
                                 if (groupUpdate != null) {
-                                    Log.i("nometeste", groupUpdate.groupId.toString() )
                                     val attGroup  = Group(
                                         groupUpdate.groupId ,
                                         textValueNameGroup.value,
@@ -661,7 +659,7 @@ class UpdateGroupActivity : ComponentActivity() {
 
                             dropdownOutputList.forEach{ output ->
                                 groupUpdate?.let {
-                                    Output(output.outputId ,output.outputName , "url" + output.outputId , false ,
+                                    Output(output.outputId ,output.outputName , "url" + output.outputId , false , false,
                                         it.groupId
                                     )
                                 }?.let { updateOutput(it) }

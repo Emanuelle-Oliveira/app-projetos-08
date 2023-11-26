@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 class OutputController {
 
     var outputList by mutableStateOf(listOf<Output>())
-    //var outputListById by mutableStateOf(listOf<Output>())
+
     init {
         getOutputs()
     }
