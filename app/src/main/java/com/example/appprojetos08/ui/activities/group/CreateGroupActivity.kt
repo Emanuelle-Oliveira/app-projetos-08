@@ -564,7 +564,7 @@ class CreateGroupActivity : ComponentActivity() {
                               }
                               dropdownOutputList.forEach{ output ->
                                   nextId?.let {
-                                      Output(output.outputId ,output.outputName , "url" + output.outputId , false ,
+                                      Output(output.outputId ,output.outputName , "url" + output.outputId , false , false,
                                           it
                                       )
                                   }?.let { updateOutput(it) }
