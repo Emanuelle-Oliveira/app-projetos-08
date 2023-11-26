@@ -359,6 +359,7 @@ class UpdateOutputActivity : ComponentActivity(){
                                 textFieldNameOutputValue.value,
                                 it.databaseUrl,
                                 it.isActive,
+                                it.isManual,
                                 it.groupId
                             )
                             updateOutput(updatedOutput)

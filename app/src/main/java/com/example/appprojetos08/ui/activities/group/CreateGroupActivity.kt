@@ -42,7 +42,6 @@ import com.example.appprojetos08.controllers.sensor.SensorController
 import com.example.appprojetos08.models.group.Group
 import com.example.appprojetos08.services.group.GroupService
 import com.example.appprojetos08.services.output.OutputService
-import com.example.appprojetos08.ui.activities.group.ui.theme.AppProjetos08Theme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
