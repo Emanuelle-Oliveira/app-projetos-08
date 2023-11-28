@@ -66,11 +66,6 @@ data class ItemCreate (
     val value: String
 )
 
-data class ItemOutput (
-    val outputId: Int,
-    val outputName: String
-)
-
 class CreateGroupActivity : ComponentActivity() {
     private val outputController = OutputController()
     private val sensorController = SensorController()
@@ -299,7 +294,7 @@ class CreateGroupActivity : ComponentActivity() {
 
         var quantity: Float = 0.0F
         val setPointList = remember { mutableStateListOf<ItemCreate>() }
-        val dropdownOutputList = remember { mutableStateListOf<ItemOutput>() }
+        val dropdownOutputList = remember { mutableStateListOf<Output>() }
 
 
         //função para customizar a cor do text field
@@ -363,7 +358,7 @@ class CreateGroupActivity : ComponentActivity() {
                                     outputList.find { it.outputId == outputId }?.let { output ->
                                         val outputName = output.outputName
 
-                                        dropdownOutputList.add(ItemOutput(outputId, outputName))
+                                        dropdownOutputList.add(output)
                                     }
                                 }
                             }
@@ -563,7 +558,7 @@ class CreateGroupActivity : ComponentActivity() {
                               }
                               dropdownOutputList.forEach{ output ->
                                   nextId?.let {
-                                      Output(output.outputId ,output.outputName , "url" + output.outputId , false , false,
+                                      Output(output.outputId ,output.outputName , output.databaseUrl , output.isActive , output.isManual,
                                           it
                                       )
                                   }?.let { updateOutput(it) }

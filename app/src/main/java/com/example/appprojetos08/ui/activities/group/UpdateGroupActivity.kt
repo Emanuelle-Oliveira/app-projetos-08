@@ -299,7 +299,7 @@ class UpdateGroupActivity : ComponentActivity() {
 
         var quantity: Float = 0.0F
         val setPointList = remember { mutableStateListOf<ItemCreate>() }
-        val dropdownOutputList = remember { mutableStateListOf<ItemOutput>() }
+        val dropdownOutputList = remember { mutableStateListOf<Output>() }
 
         setPointsList.value.forEach{ setPoint ->
             if(setPoint.sensorId == 3){
@@ -314,7 +314,7 @@ class UpdateGroupActivity : ComponentActivity() {
         }
 
         outputsList.value.forEach{output ->
-            dropdownOutputList.add(ItemOutput(output.outputId , output.outputName))
+            dropdownOutputList.add(output)
         }
 
 
@@ -382,7 +382,7 @@ class UpdateGroupActivity : ComponentActivity() {
                                     outputList.find { it.outputId == outputId }?.let { output ->
                                         val outputName = output.outputName
 
-                                        dropdownOutputList.add(ItemOutput(outputId, outputName))
+                                        dropdownOutputList.add(output)
                                     }
                                 }
                             }
@@ -661,7 +661,7 @@ class UpdateGroupActivity : ComponentActivity() {
 
                             dropdownOutputList.forEach{ output ->
                                 groupUpdate?.let {
-                                    Output(output.outputId ,output.outputName , "url" + output.outputId , false , false,
+                                    Output(output.outputId ,output.outputName , output.databaseUrl, output.isActive , output.isManual,
                                         it.groupId
                                     )
                                 }?.let { updateOutput(it) }
@@ -761,7 +761,7 @@ class UpdateGroupActivity : ComponentActivity() {
 
         Column {
             Text(
-                text = outputList.find { it.outputId == selectedOutputId }?.outputName ?: "Output",
+                text = outputList.find { it.outputId == selectedOutputId }?.outputName ?: "Saida",
                 fontSize = 16.sp,
                 color = Color.White,
                 modifier = Modifier

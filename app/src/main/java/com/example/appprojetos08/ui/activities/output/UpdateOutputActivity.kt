@@ -81,7 +81,6 @@ import com.example.appprojetos08.services.output.OutputService
 import com.example.appprojetos08.services.sensor.SensorService
 import com.example.appprojetos08.services.setPoint.SetPointService
 import com.example.appprojetos08.ui.activities.group.ItemCreate
-import com.example.appprojetos08.ui.activities.group.ItemOutput
 import kotlinx.coroutines.launch
 
 class UpdateOutputActivity : ComponentActivity(){
@@ -345,7 +344,7 @@ class UpdateOutputActivity : ComponentActivity(){
                 OutlinedTextField(
                     value = textFieldNameOutputValue.value,
                     onValueChange = { textFieldNameOutputValue.value = it },
-                    label = { Text("Nome do Output", color = Color.White) },
+                    label = { Text("Nome da Saida", color = Color.White) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = customTextFieldColors
                 )
